@@ -10,7 +10,7 @@ dashboards, and serves metrics via a FastAPI layer.
 - [x] **Phase 0** — repo scaffold, dataset
 - [x] **Phase 1** — EDA, KPI candidate list (`docs/kpi_candidates.md`)
 - [x] **Phase 2** — Postgres star schema, ETL pipeline, KPI views
-- [ ] Phase 3 — Superset dashboards (Executive, Sales)
+- [x] Phase 3 — Superset dashboards (Executive, Sales)
 - [ ] Phase 4 — RFM segmentation + sales forecasting
 - [ ] Phase 5 — API, Airflow, tests, CI
 
