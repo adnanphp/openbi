@@ -15,3 +15,7 @@ DO $$
 BEGIN
     RAISE NOTICE 'OpenBI init: schemas staging + warehouse created in %', current_database();
 END $$;
+
+-- Superset metadata schema
+CREATE SCHEMA IF NOT EXISTS superset_meta;
+GRANT ALL ON SCHEMA superset_meta TO CURRENT_USER;

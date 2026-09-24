@@ -44,3 +44,7 @@ Thumbs.db
 
 # ---- Reports (keep figures + KPI doc, ignore raw dumps if desired) ----
 # reports/eda_report.txt
+
+# ---- Superset ----
+docker/superset/superset_home/
+superset_home/
