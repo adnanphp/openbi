@@ -49,3 +49,20 @@ Revenue	$2,297,200.86
 Profit	$286,397.02
 Customers	793
 Products	1,862
+
+## Dashboards
+
+- **Executive Overview** — Revenue, Profit, Orders, Monthly trend
+  ![Executive](docs/images/executive_dashboard.png)
+
+- **Sales Intelligence** — Category, Product, Region breakdowns
+  ![Sales](docs/images/sales_dashboard.png)
+
+## Access
+
+After `make up` and `make init`:
+
+| Service | URL | Credentials |
+|---|---|---|
+| Superset | http://localhost:8088 | admin / admin |
+| Postgres | localhost:5432 | openbi / openbi |
