@@ -29,3 +29,6 @@ etl:
 
 clean:
 	docker compose down -v
+
+ml:
+	bash scripts/run_ml.sh

@@ -15,8 +15,6 @@ from openbi.config.settings import settings
 from openbi.utils.db import execute_sql_string, load_dataframe, ping
 
 
-# Portuguese → English column mapping
-# (extends easily if you find more variants)
 PT_TO_EN = {
     "linha_id":        "row_id",
     "ordem_id":        "order_id",
@@ -45,10 +43,7 @@ PT_TO_EN = {
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Lowercase, snake_case, and translate to English."""
     df = df.copy()
-
-    # 1. standard cleanup
     df.columns = (
         df.columns.astype(str)
                   .str.strip()
@@ -56,10 +51,7 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
                   .str.replace(" ", "_", regex=False)
                   .str.replace("-", "_", regex=False)
     )
-
-    # 2. translate Portuguese → English
     df = df.rename(columns={c: PT_TO_EN.get(c, c) for c in df.columns})
-
     return df
 
 
@@ -79,6 +71,12 @@ def main() -> None:
     execute_sql_string("CREATE SCHEMA IF NOT EXISTS staging;")
     execute_sql_string("CREATE SCHEMA IF NOT EXISTS warehouse;")
 
+    # ---- drop dependent view(s) BEFORE replacing the table ----
+    # pandas' `if_exists='replace'` issues a plain DROP TABLE, which fails
+    # when a view depends on it. Drop the view first, and sql/03 recreates it.
+    execute_sql_string("DROP VIEW IF EXISTS staging.superstore CASCADE;")
+    execute_sql_string("DROP TABLE IF EXISTS staging.superstore_raw CASCADE;")
+
     df = pd.read_csv(csv_path, encoding="utf-8", low_memory=False)
     print(f"  Read {len(df):,} rows × {df.shape[1]} cols from {csv_path.name}")
     print(f"  Raw columns: {list(df.columns)}")
@@ -89,7 +87,6 @@ def main() -> None:
     df = normalize_columns(df)
     print(f"  Normalized columns: {list(df.columns)}")
 
-    # sanity: verify expected columns exist
     expected = {
         "row_id", "order_id", "order_date", "ship_date", "ship_mode",
         "customer_id", "customer_name", "segment", "country", "city",

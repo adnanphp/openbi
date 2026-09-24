@@ -1,13 +1,12 @@
-"""OpenBI — end-to-end ETL pipeline (Phase 2 scope)."""
+"""OpenBI — end-to-end ETL pipeline."""
 
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from openbi.config.settings import settings
-from openbi.utils.db import execute_sql_file, ping
 from openbi.ingestion import load_csv
+from openbi.utils.db import execute_sql_file, ping
 
 
 SQL_FILES = [
@@ -17,6 +16,7 @@ SQL_FILES = [
     "04_transform_dimensions.sql",
     "05_transform_facts.sql",
     "06_views_kpis.sql",
+    "08_create_ml_tables.sql",
 ]
 
 
