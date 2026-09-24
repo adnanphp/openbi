@@ -1,3 +1,5 @@
+[![CI](https://github.com/adnanphp/openbi/actions/workflows/ci.yml/badge.svg)](https://github.com/adnanphp/openbi/actions/workflows/ci.yml)
+
 # OpenBI
 
 OpenBI is an end-to-end open-source Business Intelligence and Analytics platform.
