@@ -48,3 +48,4 @@ Thumbs.db
 # ---- Superset ----
 docker/superset/superset_home/
 superset_home/
+.env
