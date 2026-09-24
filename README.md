@@ -66,3 +66,32 @@ After `make up` and `make init`:
 |---|---|---|
 | Superset | http://localhost:8088 | admin / admin |
 | Postgres | localhost:5432 | openbi / openbi |
+
+## Key Insights from ML Layer
+
+### RFM Customer Segmentation (KMeans, k=5, rule-based labels)
+
+| Segment | Customers | Avg Recency | Avg Frequency | Avg Monetary |
+|---|---:|---:|---:|---:|
+| Champions | 106 | 25 days | 9.3 | $5,288 |
+| At Risk | 102 | 220 days | 7.8 | $4,400 |
+| Loyal Customers | 92 | 55 days | 8.6 | $3,426 |
+| Potential Loyalists | 116 | 27 days | 6.2 | $2,731 |
+| Need Attention | 221 | 167 days | 5.4 | $2,297 |
+| New Customers | 39 | 25 days | 3.3 | $1,421 |
+| Lost | 117 | 386 days | 3.4 | $794 |
+
+**Actionable finding:** the **At Risk** segment represents **$449K of historical revenue**
+across 102 customers who haven't purchased in ~7 months. Highest-priority
+win-back cohort.
+
+### Sales Forecasting
+
+| Model | MAPE | RMSE |
+|---|---:|---:|
+| **ETS (Holt-Winters)** | **15.87%** | 15,885 |
+| XGBoost (lag features) | 28.85% | 34,769 |
+| Baseline (moving avg) | 38.66% | 41,460 |
+
+ETS wins on a 48-month series. XGBoost underperforms due to limited training
+signal — a common result for short retail time series.
