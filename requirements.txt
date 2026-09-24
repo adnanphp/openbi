@@ -10,3 +10,6 @@ jupyter>=1.0
 ipykernel>=6.0
 matplotlib>=3.7
 seaborn>=0.12
+
+# ---- serialization ----
+joblib>=1.3
