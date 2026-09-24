@@ -49,3 +49,6 @@ Thumbs.db
 docker/superset/superset_home/
 superset_home/
 .env
+
+# ---- Superset exports ----
+dashboards_export.zip
