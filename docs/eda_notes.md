@@ -25,3 +25,8 @@
 
 ## KPIs confirmed buildable
 - See docs/kpi_candidates.md
+
+## Dataset variant note
+- Source CSV uses Portuguese column headers (Alura mirror of Superstore).
+- Translated to English inside `ingestion/load_csv.py` via `PT_TO_EN` map.
+- Numeric values are identical to the canonical English Superstore dataset.
