@@ -1,0 +1,67 @@
+slice_name: Monthly Revenue Trend
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  datasource: 1__table
+  viz_type: echarts_timeseries_line
+  x_axis: year
+  time_grain_sqla: P1D
+  x_axis_sort_asc: true
+  x_axis_sort_series: name
+  x_axis_sort_series_ascending: true
+  metrics:
+  - expressionType: SQL
+    sqlExpression: SUM(revenue), SUM(profit)
+    column: null
+    aggregate: null
+    datasourceWarning: false
+    hasCustomLabel: false
+    label: SUM(revenue), SUM(profit)
+    optionName: metric_13yjyaukxqu_0d17ybyo5nf7
+  groupby: []
+  adhoc_filters: []
+  order_desc: true
+  row_limit: 10000
+  truncate_metric: true
+  show_empty_columns: true
+  comparison_type: values
+  annotation_layers: []
+  forecastPeriods: 10
+  forecastInterval: 0.8
+  x_axis_title_margin: 15
+  y_axis_title_margin: 15
+  y_axis_title_position: Left
+  sort_series_type: sum
+  color_scheme: supersetColors
+  seriesType: line
+  only_total: true
+  opacity: 0.2
+  markerSize: 6
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  x_axis_time_format: smart_date
+  rich_tooltip: true
+  tooltipTimeFormat: smart_date
+  y_axis_format: SMART_NUMBER
+  truncateXAxis: true
+  y_axis_bounds:
+  - null
+  - null
+  extra_form_data: {}
+  dashboards:
+  - 3
+query_context: '{"datasource":{"id":1,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":[{"timeGrain":"P1D","columnType":"BASE_AXIS","sqlExpression":"year","label":"year","expressionType":"SQL"}],"metrics":[{"expressionType":"SQL","sqlExpression":"SUM(revenue),
+  SUM(profit)","column":null,"aggregate":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"SUM(revenue),
+  SUM(profit)","optionName":"metric_13yjyaukxqu_0d17ybyo5nf7"}],"orderby":[[{"expressionType":"SQL","sqlExpression":"SUM(revenue),
+  SUM(profit)","column":null,"aggregate":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"SUM(revenue),
+  SUM(profit)","optionName":"metric_13yjyaukxqu_0d17ybyo5nf7"},false]],"annotation_layers":[],"row_limit":10000,"series_columns":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"time_offsets":[],"post_processing":[{"operation":"pivot","options":{"index":["year"],"columns":[],"aggregates":{"SUM(revenue),
+  SUM(profit)":{"operator":"mean"}},"drop_missing_columns":false}},{"operation":"flatten"}]}],"form_data":{"datasource":"1__table","viz_type":"echarts_timeseries_line","x_axis":"year","time_grain_sqla":"P1D","x_axis_sort_asc":true,"x_axis_sort_series":"name","x_axis_sort_series_ascending":true,"metrics":[{"expressionType":"SQL","sqlExpression":"SUM(revenue),
+  SUM(profit)","column":null,"aggregate":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"SUM(revenue),
+  SUM(profit)","optionName":"metric_13yjyaukxqu_0d17ybyo5nf7"}],"groupby":[],"adhoc_filters":[],"order_desc":true,"row_limit":10000,"truncate_metric":true,"show_empty_columns":true,"comparison_type":"values","annotation_layers":[],"forecastPeriods":10,"forecastInterval":0.8,"x_axis_title_margin":15,"y_axis_title_margin":15,"y_axis_title_position":"Left","sort_series_type":"sum","color_scheme":"supersetColors","seriesType":"line","only_total":true,"opacity":0.2,"markerSize":6,"show_legend":true,"legendType":"scroll","legendOrientation":"top","x_axis_time_format":"smart_date","rich_tooltip":true,"tooltipTimeFormat":"smart_date","y_axis_format":"SMART_NUMBER","truncateXAxis":true,"y_axis_bounds":[null,null],"extra_form_data":{},"dashboards":[3],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 39d22f38-a60f-4b56-ae95-8c590a2c9eac
+version: 1.0.0
+dataset_uuid: a250345d-e0e5-44b9-9faa-be01148c0062
