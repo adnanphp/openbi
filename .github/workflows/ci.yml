@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: openbi
+          POSTGRES_PASSWORD: openbi
+          POSTGRES_DB: openbi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U openbi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Lint with ruff
+        run: |
+          pip install ruff
+          ruff check src/ tests/ || true   # non-blocking for now
+
+      - name: Bootstrap schemas
+        env:
+          PGPASSWORD: openbi
+        run: |
+          psql -h localhost -U openbi -d openbi -c "CREATE SCHEMA IF NOT EXISTS staging;"
+          psql -h localhost -U openbi -d openbi -c "CREATE SCHEMA IF NOT EXISTS warehouse;"
+
+      - name: Run ETL
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: openbi
+          POSTGRES_USER: openbi
+          POSTGRES_PASSWORD: openbi
+          DATABASE_URL: postgresql+psycopg2://openbi:openbi@localhost:5432/openbi
+        run: make init
+
+      - name: Run ML
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: openbi
+          POSTGRES_USER: openbi
+          POSTGRES_PASSWORD: openbi
+          DATABASE_URL: postgresql+psycopg2://openbi:openbi@localhost:5432/openbi
+        run: make ml
+
+      - name: Run tests
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: openbi
+          POSTGRES_USER: openbi
+          POSTGRES_PASSWORD: openbi
+          DATABASE_URL: postgresql+psycopg2://openbi:openbi@localhost:5432/openbi
+        run: pytest tests -v
