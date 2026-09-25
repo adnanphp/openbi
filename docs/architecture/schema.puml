@@ -1,0 +1,81 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+title OpenBI - Warehouse Star Schema
+
+entity "dim_customer" as dim_customer {
+  customer_key : SERIAL <<PK>>
+  --
+  customer_id : TEXT <<UNIQUE>>
+  customer_name : TEXT
+  segment : TEXT
+}
+
+entity "dim_product" as dim_product {
+  product_key : SERIAL <<PK>>
+  --
+  product_id : TEXT <<UNIQUE>>
+  product_name : TEXT
+  category : TEXT
+  sub_category : TEXT
+}
+
+entity "dim_region" as dim_region {
+  region_key : SERIAL <<PK>>
+  --
+  country : TEXT
+  region : TEXT
+  state : TEXT
+  city : TEXT
+  postal_code : TEXT
+}
+
+entity "dim_ship_mode" as dim_ship_mode {
+  ship_mode_key : SERIAL <<PK>>
+  --
+  ship_mode : TEXT <<UNIQUE>>
+}
+
+entity "dim_date" as dim_date {
+  date_key : INTEGER <<PK>>
+  --
+  full_date : DATE <<UNIQUE>>
+  year : INTEGER
+  quarter : INTEGER
+  month : INTEGER
+  month_name : TEXT
+  week : INTEGER
+  day_of_week : INTEGER
+  day_name : TEXT
+  is_weekend : BOOLEAN
+}
+
+entity "fact_sales" as fact_sales {
+  sales_key : BIGSERIAL <<PK>>
+  --
+  order_id : TEXT
+  row_id : INTEGER
+  --
+  customer_key : INTEGER <<FK>>
+  product_key : INTEGER <<FK>>
+  region_key : INTEGER <<FK>>
+  ship_mode_key : INTEGER <<FK>>
+  order_date_key : INTEGER <<FK>>
+  ship_date_key : INTEGER <<FK>>
+  --
+  sales : NUMERIC(12,4)
+  quantity : INTEGER
+  discount : NUMERIC(5,4)
+  profit : NUMERIC(12,4)
+}
+
+dim_customer  ||--o{ fact_sales
+dim_product   ||--o{ fact_sales
+dim_region    ||--o{ fact_sales
+dim_ship_mode ||--o{ fact_sales
+dim_date      ||--o{ fact_sales
+dim_date      ||--o{ fact_sales
+
+@enduml

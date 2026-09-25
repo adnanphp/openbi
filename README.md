@@ -710,3 +710,7 @@ CI includes a fresh-venv import check — prevents "works on my machine" class b
 
  License
 MIT
+
+## 🗄️ Warehouse Schema
+
+![OpenBI Star Schema](docs/architecture/schema.png)
