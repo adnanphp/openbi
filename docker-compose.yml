@@ -64,6 +64,40 @@ services:
       retries: 20
       start_period: 60s
 
+
+  airflow:
+    image: apache/airflow:2.9.1-python3.11
+    container_name: openbi-airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://openbi:openbi@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__PARALLELISM: 4
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 2
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags:ro
+      - ./airflow/plugins:/opt/airflow/plugins:ro
+      - ./airflow/logs:/opt/airflow/logs
+      - airflow_home:/opt/airflow
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      bash -c "
+        airflow db init &&
+        (airflow users create
+          --username admin --firstname Admin --lastname User
+          --role Admin --email admin@openbi.local --password admin || true) &&
+        airflow webserver & airflow scheduler
+      "
+
+
 volumes:
   openbi_pgdata:
   superset_home:
+  airflow_home:

@@ -8,6 +8,9 @@ RUN pip install --no-cache-dir \
     pyarrow==16.1.0 \
     pandas==2.2.2 \
     numpy==1.26.4 \
+    scikit-learn==1.4.2 \
+    statsmodels==0.14.2 \
+    xgboost==2.0.3 \
     psycopg2-binary==2.9.9 \
     python-dotenv==1.0.1 \
     pytest==8.0.0
@@ -29,11 +32,6 @@ for url_path, name in jars:
     urllib.request.urlretrieve(f"{base}/{url_path}", out)
     print(f"  ✓ {name} ({os.path.getsize(out):,} bytes)")
 PY
-
-COPY jobs /opt/openbi/jobs
-COPY sql  /opt/openbi/sql
-COPY conf /opt/openbi/conf
-COPY tests /opt/openbi/tests
 
 WORKDIR /opt/openbi
 

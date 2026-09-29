@@ -66,9 +66,13 @@ def _make_pool(seed_df: pd.DataFrame, size: int, prefix: str) -> pd.DataFrame:
 
 
 def _jitter_dates(series: pd.Series, seed: int) -> pd.Series:
+    """Uniform dates across a fixed window (avoids triangular distribution)."""
     rng = np.random.default_rng(seed)
-    days = rng.integers(-730, 730, size=len(series))
-    return pd.to_datetime(series) + pd.to_timedelta(days, unit="D")
+    start = pd.Timestamp("2014-01-01")
+    end = pd.Timestamp("2024-12-31")
+    span_days = (end - start).days
+    offsets = rng.integers(0, span_days, size=len(series))
+    return start + pd.to_timedelta(offsets, unit="D")
 
 
 def generate(total_rows: int, chunk_size: int, seed: int = 42) -> None:
