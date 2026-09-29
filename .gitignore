@@ -69,3 +69,8 @@ spark/**/__pycache__/
 *.parquet
 *.delta/
 _delta_log/
+
+# ---- Coverage ----
+.coverage
+coverage.xml
+htmlcov/
