@@ -47,3 +47,20 @@ cov:
 
 clean:
 	docker compose down -v
+
+# ---- v2 (Spark + Delta) ----
+bigdata-up:
+	docker compose -f docker-compose.yml -f docker-compose.bigdata.yml up -d
+
+bigdata-down:
+	docker compose -f docker-compose.yml -f docker-compose.bigdata.yml down
+
+bigdata:
+	bash spark/jobs/run_bigdata_pipeline.sh
+
+bigdata-test:
+	docker exec -i openbi-spark-master python3 -m pytest \
+		-p no:cacheprovider /opt/openbi/tests/ -v
+
+bigdata-clean:
+	rm -rf data/bronze/* data/silver/* data/gold/*
