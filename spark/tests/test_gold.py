@@ -63,9 +63,13 @@ def test_revenue_by_region_matches_fact(spark):
 
 # ============================================================ shape checks
 def test_monthly_revenue_row_count(spark):
-    """8 years × 12 months = 96 rows."""
+    """At least 10 years × 12 months = 120 rows; up to 12 × 12 = 144.
+
+    The exact count depends on the generator's date range
+    (currently 2014–2024 → 11 years → ~132 months).
+    """
     n = _gold(spark, "monthly_revenue").count()
-    assert 90 <= n <= 96, f"unexpected monthly_revenue rows: {n}"
+    assert 100 <= n <= 144, f"unexpected monthly_revenue rows: {n}"
 
 
 def test_revenue_by_category_has_three_categories(spark):
