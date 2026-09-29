@@ -714,3 +714,18 @@ MIT
 ## 🗄️ Warehouse Schema
 
 ![OpenBI Star Schema](docs/architecture/schema.png)
+
+## 🔥 Big Data Extension (v2)
+
+OpenBI scales from 10K rows (v1, Postgres) to **100M+ rows** (v2, Delta Lake + Spark)
+with the same star schema, dashboards, and API.
+
+See [docs/architecture_bigdata.md](docs/architecture_bigdata.md) for the full architecture.
+
+**Stack:** Apache Spark · PySpark · Spark SQL · Delta Lake · Parquet · Airflow · PostgreSQL · Docker
+
+**Run:**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.bigdata.yml up -d
+./spark/run_job.sh jobs/ingest_to_bronze.py
