@@ -23,6 +23,7 @@ services:
       - ./spark/jobs:/opt/openbi/jobs
       - ./spark/sql:/opt/openbi/sql
       - ./spark/conf:/opt/openbi/conf
+      - ./spark/tests:/opt/openbi/tests
       - ./data:/opt/openbi/data
     networks:
       - default
@@ -48,6 +49,7 @@ services:
       - ./spark/jobs:/opt/openbi/jobs
       - ./spark/sql:/opt/openbi/sql
       - ./spark/conf:/opt/openbi/conf
+      - ./spark/tests:/opt/openbi/tests
       - ./data:/opt/openbi/data
     networks:
       - default
@@ -72,6 +74,7 @@ services:
       - ./spark/jobs:/opt/openbi/jobs
       - ./spark/sql:/opt/openbi/sql
       - ./spark/conf:/opt/openbi/conf
+      - ./spark/tests:/opt/openbi/tests
       - ./data:/opt/openbi/data
     networks:
       - default
