@@ -52,3 +52,20 @@ superset_home/
 
 # ---- Superset exports ----
 dashboards_export.zip
+
+# ---- Big Data (Phase A+) ----
+data/raw/big_superstore/
+data/bronze/
+data/silver/
+data/gold/
+data/checkpoints/
+!data/bronze/.gitkeep
+!data/silver/.gitkeep
+!data/gold/.gitkeep
+!data/checkpoints/.gitkeep
+
+airflow/logs/
+spark/**/__pycache__/
+*.parquet
+*.delta/
+_delta_log/
