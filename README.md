@@ -729,3 +729,43 @@ See [docs/architecture_bigdata.md](docs/architecture_bigdata.md) for the full ar
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.bigdata.yml up -d
 ./spark/run_job.sh jobs/ingest_to_bronze.py
+
+---
+
+## ✅ Full v2 Roadmap Complete
+
+| Phase | Deliverable | Status |
+|---|---|---|
+| A | Spark + Delta Lake foundation (1M-row Bronze) | ✅ |
+| B | Silver star schema (5 dims + 1 fact, partitioned by year) | ✅ |
+| C | Gold aggregates → Postgres serving layer | ✅ |
+| D | Spark MLlib RFM + KMeans + forecasting | ✅ |
+| E | Airflow orchestration (daily / weekly / hourly DAGs) | ✅ |
+
+### Metrics
+
+| Layer | Rows | Notes |
+|---|---:|---|
+| Bronze (Delta) | 1,000,000 | raw, partitioned by category |
+| Silver (Delta) | 1,000,000 | star schema, partitioned by year |
+| Gold (Delta) | 1,251 | 5 pre-aggregated KPI tables |
+| `warehouse_big` (Postgres) | 1,251 | same 5 tables, JDBC-published |
+| `customer_segments` | 800 | 7 RFM segments |
+| `sales_forecast` | 18 | 3 models × 6 months |
+
+### Verified end-to-end
+
+- **34 tests** (13 silver + 12 gold + 9 ml)
+- **CI green** on every push
+- **Airflow** at `http://localhost:8090` — 3 DAGs, `openbi_smoke` runs green
+- **v1 vs v2** coexist in Postgres:
+  - `warehouse` (10K rows) → $2,297,200.86
+  - `warehouse_big` (1M rows) → $287,833,061.24
+
+### One-command pipelines
+
+```bash
+make bigdata        # bronze → silver → gold → postgres (v2)
+make bigdata-ml     # RFM + KMeans + forecasting
+make bigdata-test   # 34 Spark tests
+make airflow-up     # Airflow UI at http://localhost:8090
