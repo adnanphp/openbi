@@ -74,3 +74,9 @@ _delta_log/
 .coverage
 coverage.xml
 htmlcov/
+
+# ---- dbt ----
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+profiles.yml

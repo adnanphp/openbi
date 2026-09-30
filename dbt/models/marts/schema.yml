@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: mart_executive_kpis
+    description: "Yearly rollups: revenue, profit, margin, YoY growth"
+    columns:
+      - name: year
+        tests: [not_null, unique]
+      - name: year_revenue
+        tests: [not_null]
+      - name: year_profit
+        tests: [not_null]
+      - name: profit_margin_pct
+        tests: [not_null]
+      - name: months_reported
+        tests: [not_null]
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "profit_margin_pct BETWEEN -100 AND 100"
+      - dbt_utils.expression_is_true:
+          expression: "months_reported BETWEEN 1 AND 12"
+      - dbt_utils.expression_is_true:
+          expression: "year_revenue > 0"
+
+  - name: mart_customer_intelligence
+    description: "Per-segment customer and revenue aggregates"
+    columns:
+      - name: cluster_label
+        tests:
+          - not_null
+          - unique
+          - accepted_values:
+              values:
+                - Champions
+                - Loyal Customers
+                - Potential Loyalists
+                - At Risk
+                - Lost
+                - New Customers
+                - Need Attention
+      - name: customers
+        tests: [not_null]
+      - name: pct_of_customers
+        tests: [not_null]
+      - name: pct_of_revenue
+        tests: [not_null]
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "customers > 0"
+      - dbt_utils.expression_is_true:
+          expression: "pct_of_customers BETWEEN 0 AND 100"
+      - dbt_utils.expression_is_true:
+          expression: "pct_of_revenue BETWEEN 0 AND 100"
+      - dbt_utils.expression_is_true:
+          expression: "ROUND(pct_of_customers::numeric, 0) BETWEEN 0 AND 100"
+
+  - name: mart_forecast_performance
+    description: "Winning model's forecast + uncertainty bands per month"
+    columns:
+      - name: forecast_month
+        tests: [not_null, unique]
+      - name: winning_model
+        tests:
+          - not_null
+          - accepted_values:
+              values: [baseline_ma, ets, xgboost]
+      - name: forecast_revenue
+        tests: [not_null]
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "forecast_revenue > 0"
+      - dbt_utils.expression_is_true:
+          expression: "yhat_upper >= forecast_revenue"
+      - dbt_utils.expression_is_true:
+          expression: "forecast_revenue >= yhat_lower"

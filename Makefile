@@ -64,3 +64,27 @@ bigdata-test:
 
 bigdata-clean:
 	rm -rf data/bronze/* data/silver/* data/gold/*
+
+# ---- dbt ----
+DBT_CMD = docker compose -f docker-compose.yml -f docker-compose.bigdata.yml -f docker-compose.dbt.yml run --rm dbt
+
+dbt-build:
+	$(DBT_CMD) dbt deps
+	$(DBT_CMD) dbt build
+
+dbt-run:
+	$(DBT_CMD) dbt run
+
+dbt-test:
+	$(DBT_CMD) dbt test
+
+dbt-docs:
+	$(DBT_CMD) dbt docs generate
+	@echo "run 'make dbt-docs-serve' in another terminal"
+
+dbt-docs-serve:
+	docker compose -f docker-compose.yml -f docker-compose.bigdata.yml -f docker-compose.dbt.yml up -d dbt-docs
+	@echo "dbt docs at http://localhost:8085"
+
+dbt-docs-stop:
+	docker compose -f docker-compose.yml -f docker-compose.bigdata.yml -f docker-compose.dbt.yml stop dbt-docs
