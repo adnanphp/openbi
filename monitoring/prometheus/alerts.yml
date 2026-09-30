@@ -1,0 +1,38 @@
+groups:
+  - name: openbi
+    interval: 30s
+    rules:
+
+      - alert: OpenBIDataStale
+        expr: openbi_data_freshness_seconds > 90000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OpenBI data is stale (> 25h)"
+          description: "No successful pipeline run in over 25 hours."
+
+      - alert: OpenBIFactRowsDropping
+        expr: delta(openbi_fact_sales_rows[1h]) < -1000
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Fact sales row count is dropping"
+
+      - alert: OpenBIForecastMAPEHigh
+        expr: openbi_forecast_mape > 50
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Forecast MAPE is above 50%"
+          description: "Model quality has degraded."
+
+      - alert: AirflowSchedulerDown
+        expr: up{job="airflow"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Airflow scheduler is down"

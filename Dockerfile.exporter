@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    pandas>=2.0 \
+    pyarrow>=16.0 \
+    sqlalchemy>=2.0 \
+    psycopg2-binary>=2.9 \
+    python-dotenv>=1.0 \
+    prometheus-client>=0.20
+
+COPY src/ /app/src/
+ENV PYTHONPATH=/app/src
+
+EXPOSE 9103
+
+CMD ["python", "-m", "openbi.metrics.exporter"]
