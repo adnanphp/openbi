@@ -88,3 +88,45 @@ dbt-docs-serve:
 
 dbt-docs-stop:
 	docker compose -f docker-compose.yml -f docker-compose.bigdata.yml -f docker-compose.dbt.yml stop dbt-docs
+
+# ---- Streaming (Phase I) ----
+KAFKA_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.bigdata.yml -f docker-compose.kafka.yml
+
+streaming-up:
+	$(KAFKA_COMPOSE) up -d kafka kafka-ui
+	@echo "waiting 20s for kafka..."
+	@sleep 20
+	$(KAFKA_COMPOSE) exec -T kafka kafka-topics.sh --bootstrap-server localhost:9092 --create --if-not-exists --topic orders --partitions 3 --replication-factor 1 || true
+	@echo "Kafka UI: http://localhost:8086"
+
+streaming-down:
+	$(KAFKA_COMPOSE) stop kafka kafka-ui
+
+streaming-produce:
+	python -m streaming.producer --bootstrap localhost:9092 --rate 5
+
+streaming-bronze:
+	$(KAFKA_COMPOSE) exec -T spark-master /opt/bitnami/spark/bin/spark-submit \
+		--master spark://spark-master:7077 \
+		--packages io.delta:delta-spark_2.12:3.1.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+		--conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+		--conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+		/opt/openbi/jobs/streaming/stream_orders.py
+
+streaming-postgres:
+	$(KAFKA_COMPOSE) exec -T spark-master /opt/bitnami/spark/bin/spark-submit \
+		--master local[2] \
+		--packages io.delta:delta-spark_2.12:3.1.0,org.postgresql:postgresql:42.7.3 \
+		--conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+		--conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+		/opt/openbi/jobs/streaming/stream_to_postgres.py
+
+streaming-status:
+	docker exec openbi-postgres psql -U openbi -d openbi -c "SELECT COUNT(*) AS events, ROUND(SUM(sales),2) AS revenue FROM warehouse_big.orders_realtime;"
+
+fix-perms:
+	@mkdir -p data/bronze data/silver data/gold data/checkpoints
+	@mkdir -p data/streaming/bronze_orders data/streaming/silver_orders
+	@mkdir -p data/checkpoints/orders_bronze data/checkpoints/orders_postgres
+	@sudo chmod -R 777 data/bronze data/silver data/gold data/checkpoints data/streaming
+	@echo "✓ data folders are writable"
