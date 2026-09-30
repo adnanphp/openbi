@@ -64,3 +64,6 @@ bigdata-test:
 
 bigdata-clean:
 	rm -rf data/bronze/* data/silver/* data/gold/*
+
+ci-data:
+	python scripts/generate_ci_dataset.py

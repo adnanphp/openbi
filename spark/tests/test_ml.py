@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 
-GOLD = "/opt/openbi/data/gold"
+GOLD = os.environ.get("OPENBI_GOLD_PATH", "/opt/openbi/data/gold")
 
 
 @pytest.fixture(scope="session")
