@@ -132,6 +132,13 @@ def build_dim_date(bronze: DataFrame) -> DataFrame:
 
     min_d, max_d = bounds["min_d"], bounds["max_d"]
 
+    if min_d is None or max_d is None:
+        raise ValueError(
+            f"Bronze has no valid order_date values. "
+            f"min={min_d}, max={max_d}. Check that order_date is a string column "
+            f"in ISO format (YYYY-MM-DD)."
+        )
+
     days = (
         bronze.sparkSession
         .range(0, (max_d - min_d).days + 1)

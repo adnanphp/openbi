@@ -47,6 +47,12 @@ def main() -> None:
     df["row_id"] = range(len(df))
     df["order_id"] = [f"CI-{i:07d}" for i in df["row_id"]]
 
+    # Bronze schema declares order_date / ship_date as strings.
+    # Write them as ISO strings so F.to_date() parses cleanly.
+    for col in ("order_date", "ship_date"):
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce").dt.strftime("%Y-%m-%d")
+
     out = OUT_DIR / "part-00000.parquet"
     df.to_parquet(out, engine="pyarrow", compression="snappy", index=False)
     print(f"✓ wrote {len(df):,} rows to {out.relative_to(ROOT)}")
