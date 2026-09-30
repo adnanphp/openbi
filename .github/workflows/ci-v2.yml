@@ -1,0 +1,135 @@
+name: CI v2 (Spark)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "spark/**"
+      - "sql/**"
+      - "airflow/**"
+      - "scripts/**"
+      - "requirements*.txt"
+      - ".github/workflows/ci-v2.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "spark/**"
+      - "sql/**"
+      - "airflow/**"
+      - "scripts/**"
+
+jobs:
+  spark-pipeline:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: openbi
+          POSTGRES_PASSWORD: openbi
+          POSTGRES_DB: openbi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U openbi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: openbi
+      POSTGRES_USER: openbi
+      POSTGRES_PASSWORD: openbi
+      DATABASE_URL: postgresql+psycopg2://openbi:openbi@localhost:5432/openbi
+      SPARK_LOCAL_IP: 127.0.0.1
+      PYSPARK_PYTHON: python3
+      PYSPARK_DRIVER_PYTHON: python3
+      JAVA_OPTS: "-Xmx2g"
+      OPENBI_BRONZE_PATH: ${{ github.workspace }}/data/bronze/sales
+      OPENBI_SILVER_PATH: ${{ github.workspace }}/data/silver
+      OPENBI_GOLD_PATH: ${{ github.workspace }}/data/gold
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pip install -e .
+
+      - name: Generate CI dataset (10K rows)
+        run: python scripts/generate_ci_dataset.py
+
+      - name: Bootstrap Postgres schemas
+        run: |
+          PGPASSWORD=openbi psql -h localhost -U openbi -d openbi <<'SQL'
+          CREATE SCHEMA IF NOT EXISTS staging;
+          CREATE SCHEMA IF NOT EXISTS warehouse;
+          CREATE SCHEMA IF NOT EXISTS warehouse_big;
+          SQL
+
+      - name: Apply warehouse DDL
+        run: |
+          PGPASSWORD=openbi psql -h localhost -U openbi -d openbi \
+            -f sql/10_create_warehouse_big.sql
+          PGPASSWORD=openbi psql -h localhost -U openbi -d openbi \
+            -f sql/11_create_ml_tables_big.sql
+
+      - name: Run Bronze ingestion
+        run: |
+          spark-submit \
+            --master local[2] \
+            --packages io.delta:delta-spark_2.12:3.1.0 \
+            --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+            --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+            --conf spark.sql.warehouse.dir=/tmp/spark-warehouse \
+            --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp \
+            spark/jobs/ingest_to_bronze.py \
+              --raw-glob "$PWD/data/raw/big_superstore/*.parquet" \
+              --bronze-path "$PWD/data/bronze/sales"
+
+      - name: Run Silver build
+        run: |
+          spark-submit \
+            --master local[2] \
+            --packages io.delta:delta-spark_2.12:3.1.0 \
+            --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+            --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+            --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp \
+            spark/jobs/bronze_to_silver.py \
+              --bronze-path "$PWD/data/bronze/sales" \
+              --silver-root "$PWD/data/silver"
+
+      - name: Run Gold aggregations
+        run: |
+          spark-submit \
+            --master local[2] \
+            --packages io.delta:delta-spark_2.12:3.1.0 \
+            --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+            --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+            --conf spark.driver.extraJavaOptions=-Dderby.system.home=/tmp \
+            spark/jobs/silver_to_gold.py \
+              --silver-root "$PWD/data/silver" \
+              --gold-root "$PWD/data/gold"
+
+      - name: Run Silver tests
+        run: |
+          pytest spark/tests/test_silver.py -v --no-header
+
+      - name: Run Gold tests
+        run: |
+          pytest spark/tests/test_gold.py -v --no-header

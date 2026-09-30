@@ -7,13 +7,15 @@ Run inside the spark-master container:
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 
-GOLD = "/opt/openbi/data/gold"
-SILVER = "/opt/openbi/data/silver"
+GOLD = os.environ.get("OPENBI_GOLD_PATH", "/opt/openbi/data/gold")
+SILVER = os.environ.get("OPENBI_SILVER_PATH", "/opt/openbi/data/silver")
 
 
 @pytest.fixture(scope="session")
@@ -22,6 +24,7 @@ def spark() -> SparkSession:
         SparkSession.builder
         .appName("test-gold")
         .master("local[2]")
+        .config("spark.jars.packages", "io.delta:delta-spark_2.12:3.1.0")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config("spark.sql.catalog.spark_catalog",
                 "org.apache.spark.sql.delta.catalog.DeltaCatalog")
@@ -63,13 +66,15 @@ def test_revenue_by_region_matches_fact(spark):
 
 # ============================================================ shape checks
 def test_monthly_revenue_row_count(spark):
-    """At least 10 years × 12 months = 120 rows; up to 12 × 12 = 144.
+    """Row count depends on the dataset's date range.
 
-    The exact count depends on the generator's date range
-    (currently 2014–2024 → 11 years → ~132 months).
+    - Big dataset (1M rows, 2014–2024): ~132 rows
+    - CI dataset  (~10K rows, 2014–2017): ~48 rows
+
+    Assert only that we have at least 3 years of monthly data.
     """
     n = _gold(spark, "monthly_revenue").count()
-    assert 100 <= n <= 144, f"unexpected monthly_revenue rows: {n}"
+    assert 36 <= n <= 200, f"unexpected monthly_revenue rows: {n}"
 
 
 def test_revenue_by_category_has_three_categories(spark):

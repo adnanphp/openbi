@@ -6,13 +6,15 @@ Run inside the spark-master container:
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 
-SILVER = "/opt/openbi/data/silver"
-BRONZE = "/opt/openbi/data/bronze/sales"
+SILVER = os.environ.get("OPENBI_SILVER_PATH", "/opt/openbi/data/silver")
+BRONZE = os.environ.get("OPENBI_BRONZE_PATH", "/opt/openbi/data/bronze/sales")
 
 
 @pytest.fixture(scope="session")
