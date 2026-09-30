@@ -48,6 +48,9 @@ jobs:
       PYSPARK_PYTHON: python3
       PYSPARK_DRIVER_PYTHON: python3
       JAVA_OPTS: "-Xmx2g"
+      OPENBI_BRONZE_PATH: ${{ github.workspace }}/data/bronze/sales
+      OPENBI_SILVER_PATH: ${{ github.workspace }}/data/silver
+      OPENBI_GOLD_PATH: ${{ github.workspace }}/data/gold
 
     steps:
       - uses: actions/checkout@v4
