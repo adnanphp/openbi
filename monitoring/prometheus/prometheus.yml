@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: openbi
+    env: local
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: statsd-exporter
+    static_configs:
+      - targets: ["statsd-exporter:9102"]
+
+  - job_name: openbi-exporter
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["openbi-exporter:9103"]
+
+  - job_name: airflow
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["openbi-airflow:8080"]
+    metrics_path: /metrics

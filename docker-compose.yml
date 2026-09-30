@@ -79,6 +79,10 @@ services:
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
       AIRFLOW__CORE__PARALLELISM: 4
       AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 2
+      AIRFLOW__METRICS__STATSD_ON: "True"
+      AIRFLOW__METRICS__STATSD_HOST: statsd-exporter
+      AIRFLOW__METRICS__STATSD_PORT: 9125
+      AIRFLOW__METRICS__STATSD_PREFIX: airflow
     ports:
       - "8090:8080"
     volumes:
@@ -97,7 +101,78 @@ services:
       "
 
 
+
+  # -------------------- MONITORING --------------------
+  statsd-exporter:
+    image: prom/statsd-exporter:v0.26.1
+    container_name: openbi-statsd-exporter
+    ports:
+      - "9125:9125/udp"
+      - "9102:9102"
+    command:
+      - "--statsd.mapping-config=/etc/statsd/mapping.yaml"
+    volumes:
+      - ./monitoring/statsd/mapping.yaml:/etc/statsd/mapping.yaml:ro
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: openbi-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    depends_on:
+      - statsd-exporter
+
+  openbi-exporter:
+    build:
+      context: .
+      dockerfile: Dockerfile.exporter
+    container_name: openbi-exporter
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: openbi
+      POSTGRES_USER: openbi
+      POSTGRES_PASSWORD: openbi
+      DATABASE_URL: postgresql+psycopg2://openbi:openbi@postgres:5432/openbi
+      EXPORTER_PORT: 9103
+      EXPORTER_INTERVAL: 30
+    ports:
+      - "9103:9103"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: openbi-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+
 volumes:
   openbi_pgdata:
   superset_home:
   airflow_home:
+  prometheus_data:
+  grafana_data:

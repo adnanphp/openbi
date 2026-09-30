@@ -1,0 +1,77 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area"},
+      "targets": [
+        {"expr": "openbi_fact_sales_rows", "legendFormat": "fact_sales"}
+      ],
+      "title": "Fact Sales Rows",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area"},
+      "targets": [
+        {"expr": "openbi_customer_segments_rows", "legendFormat": "segments"}
+      ],
+      "title": "Customer Segments",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value"},
+      "targets": [
+        {"expr": "openbi_data_freshness_seconds", "legendFormat": "age"}
+      ],
+      "title": "Data Freshness",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "id": 4,
+      "targets": [
+        {"expr": "openbi_segment_size", "legendFormat": "{{label}}"}
+      ],
+      "title": "Customers per RFM Segment",
+      "type": "barchart"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "id": 5,
+      "targets": [
+        {"expr": "rate(airflow_task_duration_seconds_sum[5m])", "legendFormat": "{{dag_id}} / {{task_id}}"}
+      ],
+      "title": "Airflow Task Duration (5m rate)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["openbi"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "OpenBI — Pipeline Overview",
+  "uid": "openbi-pipeline",
+  "version": 1
+}
