@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: warehouse_big
+    description: "Spark-produced Gold tables (Phase C/D). Read-only."
+    schema: warehouse_big
+    tables:
+      - name: monthly_revenue
+        description: "Monthly revenue + profit + order count"
+        columns:
+          - name: year
+            tests: [not_null]
+          - name: month
+            tests: [not_null]
+          - name: revenue
+            tests: [not_null]
+      - name: revenue_by_category
+        columns:
+          - name: category
+            tests: [not_null]
+          - name: revenue
+            tests: [not_null]
+      - name: revenue_by_region
+        columns:
+          - name: region
+            tests: [not_null]
+      - name: top_products
+        columns:
+          - name: product_id
+            tests: [not_null, unique]
+      - name: customer_segments
+        columns:
+          - name: customer_id
+            tests: [not_null, unique]
+          - name: cluster_label
+            tests: [not_null]
+      - name: sales_forecast
+        columns:
+          - name: forecast_month
+            tests: [not_null]
+          - name: model_name
+            tests: [not_null]

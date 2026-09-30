@@ -1,0 +1,50 @@
+# dbt overlay
+#   one-shot:  docker compose -f ... run --rm dbt dbt run
+#   docs:      docker compose -f ... up -d dbt-docs
+#              → http://localhost:8085
+
+services:
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbt
+    container_name: openbi-dbt
+    environment:
+      DBT_HOST: openbi-postgres
+      DBT_PORT: 5432
+      DBT_USER: openbi
+      DBT_PASSWORD: openbi
+      DBT_DBNAME: openbi
+      DBT_SCHEMA: analytics
+    volumes:
+      - ./dbt:/dbt
+    working_dir: /dbt
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+
+  dbt-docs:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbt
+    container_name: openbi-dbt-docs
+    environment:
+      DBT_HOST: openbi-postgres
+      DBT_PORT: 5432
+      DBT_USER: openbi
+      DBT_PASSWORD: openbi
+      DBT_DBNAME: openbi
+      DBT_SCHEMA: analytics
+    volumes:
+      - ./dbt:/dbt
+    working_dir: /dbt
+    ports:
+      - "8085:8085"
+    command: ["dbt", "docs", "serve", "--port", "8085", "--host", "0.0.0.0"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
