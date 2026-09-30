@@ -1,0 +1,64 @@
+# Kafka + Kafka UI overlay
+#   docker compose -f docker-compose.yml -f docker-compose.kafka.yml up -d
+#
+# Access:
+#   Kafka broker (host tools):  localhost:9093
+#   Kafka broker (containers):  kafka:9092
+#   Kafka UI:                   http://localhost:8086
+
+services:
+
+  kafka:
+    image: docker.io/bitnamilegacy/kafka:3.7
+    container_name: openbi-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"      # internal listener (for other containers)
+      - "9093:9093"      # external listener (for host tools like producer.py)
+    environment:
+      # KRaft mode (no ZooKeeper)
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:9094"
+      KAFKA_CFG_LISTENERS: "INTERNAL://:9092,EXTERNAL://:9093,CONTROLLER://:9094"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://localhost:9093"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_NUM_PARTITIONS: "3"
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: "1"
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      # log retention (in hours) — keeps disk bounded
+      KAFKA_CFG_LOG_RETENTION_HOURS: "24"
+      KAFKA_CFG_LOG_SEGMENT_BYTES: "104857600"      # 100 MB per segment
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: openbi-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8086:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: openbi
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    networks:
+      - default
+
+volumes:
+  kafka_data:
