@@ -769,3 +769,45 @@ make bigdata        # bronze → silver → gold → postgres (v2)
 make bigdata-ml     # RFM + KMeans + forecasting
 make bigdata-test   # 34 Spark tests
 make airflow-up     # Airflow UI at http://localhost:8090
+
+---
+
+## ✅ Complete Roadmap
+
+| Phase | Deliverable | Status |
+|---|---|---|
+| A | Spark + Delta foundation | ✅ |
+| B | Silver star schema | ✅ |
+| C | Gold aggregates → Postgres | ✅ |
+| D | Spark MLlib RFM + forecasting | ✅ |
+| E | Airflow orchestration | ✅ |
+| F | Spark CI in GitHub Actions | ✅ |
+| G | Prometheus + Grafana | ✅ |
+| H | dbt Analytics Engineering | ✅ |
+| I | Kafka + Spark Structured Streaming | ✅ |
+
+## Full Stack
+
+- **Ingestion:** Kafka (KRaft), pandas, PySpark
+- **Storage:** Delta Lake, PostgreSQL
+- **Compute:** Apache Spark (batch + streaming), Spark SQL, Spark MLlib
+- **Orchestration:** Apache Airflow, Make
+- **Transformation:** dbt (49 tests, lineage docs)
+- **BI:** Apache Superset (batch + real-time dashboards)
+- **API:** FastAPI
+- **Monitoring:** Prometheus, Grafana, statsd-exporter
+- **CI:** GitHub Actions (2 workflows)
+- **Runtime:** Docker Compose (4 overlay files)
+
+## Services
+
+| Service | URL |
+|---|---|
+| Superset | http://localhost:8088 |
+| Airflow | http://localhost:8090 |
+| Grafana | http://localhost:3001 |
+| Prometheus | http://localhost:9090 |
+| Kafka UI | http://localhost:8086 |
+| Spark master UI | http://localhost:8095 |
+| dbt docs | http://localhost:8085 |
+| FastAPI | http://localhost:8000/docs |
