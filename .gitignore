@@ -87,3 +87,8 @@ data/checkpoints/
 
 # backups are local only — do not commit dumps
 backups/*.sql
+
+# ---- Accidentally created Terraform path (security) ----
+infrastructure/terraform/~/
+**/kubeconfig
+**/*.kubeconfig
