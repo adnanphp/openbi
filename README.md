@@ -658,3 +658,7 @@ MIT License — see [`LICENSE`](LICENSE).
     Superset · FastAPI · Prometheus · Kubernetes
   </sub>
 </p>
+
+## Writeups
+
+- **Dev.to:** [How I Built a Two-Tier Data Platform in 9 Phases](https://dev.to/adnanphp/how-i-built-a-two-tier-data-platform-in-9-phases-spark-kafka-dbt-kubernetes-1ebe)
