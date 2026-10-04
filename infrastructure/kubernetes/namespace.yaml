@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openbi
+  labels:
+    app.kubernetes.io/name: openbi
+    app.kubernetes.io/part-of: openbi-platform

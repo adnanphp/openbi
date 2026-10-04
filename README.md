@@ -811,3 +811,23 @@ make airflow-up     # Airflow UI at http://localhost:8090
 | Spark master UI | http://localhost:8095 |
 | dbt docs | http://localhost:8085 |
 | FastAPI | http://localhost:8000/docs |
+
+## Kubernetes Deployment
+
+OpenBI can be deployed to a local Kubernetes cluster provisioned with
+Terraform and Kind.
+
+```bash
+# 1. Provision the cluster
+cd infrastructure/terraform
+terraform init && terraform apply
+
+# 2. Deploy OpenBI
+kubectl config use-context kind-openbi
+kubectl apply -k infrastructure/kubernetes/
+
+# 3. Verify
+kubectl get pods -n openbi
+kubectl port-forward -n openbi svc/fastapi 8000:8000
+curl http://localhost:8000/health
+See docs/kubernetes.md for full instructions.
