@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- Accent bar on the left -->
+  <rect x="0" y="0" width="8" height="640" fill="url(#accent)"/>
+
+  <!-- Title -->
+  <text x="80" y="180" font-family="Inter, -apple-system, sans-serif"
+        font-size="96" font-weight="700" fill="#f8fafc" letter-spacing="-2">
+    OpenBI
+  </text>
+
+  <!-- Subtitle -->
+  <text x="80" y="250" font-family="Inter, -apple-system, sans-serif"
+        font-size="34" fill="#94a3b8">
+    End-to-End Data Platform
+  </text>
+
+  <!-- Divider -->
+  <line x1="80" y1="300" x2="1200" y2="300" stroke="#334155" stroke-width="1"/>
+
+  <!-- Stack lines -->
+  <text x="80" y="360" font-family="Inter, -apple-system, sans-serif"
+        font-size="24" fill="#cbd5e1">
+    Spark · Delta Lake · Kafka · Airflow · dbt
+  </text>
+  <text x="80" y="400" font-family="Inter, -apple-system, sans-serif"
+        font-size="24" fill="#cbd5e1">
+    PostgreSQL · Superset · FastAPI · Kubernetes · Terraform
+  </text>
+
+  <!-- Metrics -->
+  <text x="80" y="490" font-family="Inter, -apple-system, sans-serif"
+        font-size="20" font-weight="600" fill="#38bdf8">
+    1M rows · 100+ tests · 9 phases · CI green
+  </text>
+
+  <!-- Bottom handle -->
+  <text x="80" y="580" font-family="Inter, -apple-system, sans-serif"
+        font-size="18" fill="#64748b">
+    github.com/adnanphp/openbi
+  </text>
+
+  <!-- Right side: version badge -->
+  <rect x="1050" y="140" width="160" height="50" rx="25" fill="#1e40af"/>
+  <text x="1130" y="172" font-family="Inter, -apple-system, sans-serif"
+        font-size="22" font-weight="600" fill="#f8fafc" text-anchor="middle">
+    v2.0.0
+  </text>
+</svg>
