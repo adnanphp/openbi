@@ -150,3 +150,26 @@ bigdata-ml:
 	./spark/run_job.sh jobs/ml_rfm_kmeans.py
 	./spark/run_job.sh jobs/ml_forecast.py
 	./spark/run_job.sh jobs/publish_ml_to_postgres.py
+
+# ---- Kubernetes ----
+k8s-up:
+	cd infrastructure/terraform && terraform apply -auto-approve
+	kind export kubeconfig --name openbi || true
+	kubectl config use-context kind-openbi
+	kubectl apply -k infrastructure/kubernetes/
+	@echo ""
+	@echo "waiting 30s for pods..."
+	@sleep 30
+	kubectl get pods -n openbi
+
+k8s-down:
+	kubectl delete -k infrastructure/kubernetes/ --ignore-not-found
+	cd infrastructure/terraform && terraform destroy -auto-approve
+
+k8s-status:
+	kubectl get all -n openbi
+	kubectl get pvc -n openbi
+
+k8s-logs:
+	kubectl logs -n openbi -l app=superset --tail=20
+	kubectl logs -n openbi -l app=fastapi --tail=20
