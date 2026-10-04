@@ -1,321 +1,418 @@
 # 📊 OpenBI — End-to-End Business Intelligence & Analytics Platform
 
 [![CI](https://github.com/adnanphp/openbi/actions/workflows/ci.yml/badge.svg)](https://github.com/adnanphp/openbi/actions/workflows/ci.yml)
+[![CI v2](https://github.com/adnanphp/openbi/actions/workflows/ci-v2.yml/badge.svg)](https://github.com/adnanphp/openbi/actions/workflows/ci-v2.yml)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python\&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql\&logoColor=white)
+![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.5-E25A1C?logo=apachespark\&logoColor=white)
+![Kafka](https://img.shields.io/badge/Kafka-3.7-231F20?logo=apachekafka\&logoColor=white)
+![dbt](https://img.shields.io/badge/dbt-analytics-FF694B?logo=dbt\&logoColor=white)
+![Airflow](https://img.shields.io/badge/Airflow-orchestration-017CEE?logo=apacheairflow\&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi\&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker\&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Kind-326CE5?logo=kubernetes\&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?logo=terraform\&logoColor=white)
 ![Superset](https://img.shields.io/badge/Apache%20Superset-BI-20A4F3)
-![scikit--learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?logo=scikit-learn\&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-> **An open-source, end-to-end Business Intelligence platform combining data engineering, analytics, machine learning, forecasting, dashboards, APIs, testing, and containerized deployment.**
+> **An open-source, end-to-end Business Intelligence platform combining batch data engineering, stream processing, machine learning, forecasting, dashboards, APIs, monitoring, and Kubernetes deployment.**
 
 OpenBI transforms retail transaction data into a production-style analytics platform.
 
-The system:
+It operates at multiple scales:
 
-**CSV → ETL → PostgreSQL Data Warehouse → Analytics → ML → Forecasting → Superset Dashboards → FastAPI**
+* **v1:** single-node PostgreSQL warehouse processing ~10K rows
+* **v2:** distributed Spark + Delta Lake pipeline processing 1M+ rows
+* **Streaming:** Kafka + Spark Structured Streaming for real-time events
+* **Deployment:** Docker, Kubernetes/Kind, Terraform, and Kustomize
 
----
-
-## ✨ Highlights
-
-| Capability             |                 Result |
-| ---------------------- | ---------------------: |
-|  Records ingested    |              **9,994** |
-|  Total revenue       |      **$2,297,200.86** |
-|  Total profit        |        **$286,397.02** |
-|  Warehouse tables   | **6 dimensions/facts** |
-|  KPI views           |                  **5** |
-|  Customer segments   |                  **7** |
-|  Forecasting horizon |          **48 months** |
-|  Superset dashboards |                  **3** |
-|  Automated tests     |                 **27** |
-|  CI                  |     **GitHub Actions** |
-
-###  Key Results
-
-* **RFM + KMeans** identifies **7 actionable customer segments**
-* **At Risk customers** represent approximately **$449K** in historical revenue
-* **ETS forecasting achieves 15.87% MAPE**
-* **FastAPI** exposes KPIs, customer segments, and forecasts
-* **Apache Superset** provides Executive, Sales, and Customer dashboards
-* Complete pipeline can be reproduced with:
-
-```bash
-make init
-```
-
----
-
-#  Architecture
+## 🔄 End-to-End Architecture
 
 ```text
-                         ┌──────────────────────────┐
-                         │  data/raw/superstore.csv │
-                         └─────────────┬────────────┘
-                                       │
-                                       ▼
-                         ┌──────────────────────────┐
-                         │     Python Ingestion     │
-                         │  • Translation           │
-                         │  • Type coercion         │
-                         │  • Validation            │
-                         └─────────────┬────────────┘
-                                       │
-                                       ▼
-                    ┌─────────────────────────────────┐
-                    │      PostgreSQL Staging         │
-                    │      staging.superstore_raw     │
-                    └────────────────┬────────────────┘
-                                     │
-                                     ▼
-                  ┌──────────────────────────────────────┐
-                  │       PostgreSQL Data Warehouse      │
-                  │                                      │
-                  │          ⭐ Star Schema               │
-                  │                                      │
-                  │  dim_customer    dim_product         │
-                  │  dim_region      dim_ship_mode       │
-                  │  dim_date        fact_sales           │
-                  └──────────────────┬───────────────────┘
-                                     │
-              ┌──────────────────────┼──────────────────────┐
-              │                      │                      │
-              ▼                      ▼                      ▼
-      ┌────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-      │   KPI Layer    │    │  ML Segmentation│    │  ML Forecasting │
-      │                │    │                 │    │                 │
-      │ Revenue        │    │ RFM             │    │ Baseline        │
-      │ Profit         │    │ KMeans          │    │ ETS             │
-      │ Category       │    │ 7 segments      │    │ XGBoost         │
-      │ Region         │    │                 │    │                 │
-      └───────┬────────┘    └────────┬────────┘    └────────┬────────┘
-              │                      │                      │
-              └──────────────────────┼──────────────────────┘
-                                     │
-                    ┌────────────────┴────────────────┐
-                    │                                 │
-                    ▼                                 ▼
-          ┌──────────────────┐             ┌──────────────────┐
-          │ Apache Superset  │             │     FastAPI      │
-          │                  │             │                  │
-          │ Executive        │             │ /kpis            │
-          │ Sales            │             │ /customers       │
-          │ Customer         │             │ /forecasts       │
-          └──────────────────┘             └──────────────────┘
+CSV → ETL → PostgreSQL Star Schema → Analytics → ML → Superset → FastAPI
+                       │
+                       ├─► Spark + Delta Lake (1M+ rows)
+                       ├─► Kafka + Structured Streaming
+                       ├─► dbt (SQL transformations + tests)
+                       ├─► Airflow (orchestration)
+                       ├─► Prometheus + Grafana (monitoring)
+                       └─► Kubernetes + Terraform (deployment)
 ```
 
 ---
 
-#  Technology Stack
+## 🎯 Executive Summary
 
-| Layer                | Technologies            |
-| -------------------- | ----------------------- |
-| **Language**         | Python 3.12             |
-| **Database**         | PostgreSQL              |
-| **ORM / SQL**        | SQLAlchemy              |
-| **BI / Dashboards**  | Apache Superset         |
-| **Machine Learning** | scikit-learn, XGBoost   |
-| **Forecasting**      | statsmodels             |
-| **API**              | FastAPI                 |
-| **Containers**       | Docker / Docker Compose |
-| **Testing**          | pytest                  |
-| **CI/CD**            | GitHub Actions          |
-| **Orchestration**    | Apache Airflow          |
-| **Data Processing**  | Pandas / NumPy          |
+|                    | **v1 — PostgreSQL** |  **v2 — Spark + Delta** | **Streaming — Kafka** |
+| ------------------ | ------------------: | ----------------------: | --------------------: |
+| **Rows processed** |               9,994 |              1,000,000+ |        12,000+ events |
+| **Revenue**        |       $2,297,200.86 |         $287,833,061.24 |                  Live |
+| **Storage**        |          PostgreSQL | Delta Lake + PostgreSQL |    Delta + PostgreSQL |
+| **Compute**        |                 SQL |     PySpark + Spark SQL |  Structured Streaming |
+| **Runtime**        |             Seconds |            ~4 min batch |   ~10 s micro-batches |
+
+### Skills Demonstrated
+
+**Data Engineering · Analytics Engineering · Business Intelligence · Machine Learning · Distributed Systems · Stream Processing · DevOps · Cloud-Native Deployment**
+
+**Testing:** 100+ automated checks across unit, integration, data-quality, dbt, Spark, and streaming layers.
+
+**CI/CD:** Two GitHub Actions workflows, both green.
 
 ---
 
-#  Quickstart
+## ✨ Key Results
+
+### Business Intelligence — v1
+
+* **7 actionable customer segments** using RFM + KMeans
+* **$449K** in historical revenue associated with the At Risk segment
+* **15.87% MAPE** using ETS forecasting over a 48-month horizon
+* Executive, sales, and customer dashboards in Apache Superset
+* FastAPI service exposing analytics and ML results
+
+### Distributed Analytics — v2
+
+* PySpark pipeline processing **1M rows**
+* Bronze → Silver → Gold medallion architecture using Delta Lake
+* Same dimensional model and BI layer as v1
+* Spark MLlib experiments for segmentation and forecasting
+* KRR vs MLP experiments documented in the [companion research project](https://github.com/adnanphp/diffusion-hilbert)
+
+### Real-Time Streaming
+
+```text
+Kafka (KRaft)
+     ↓
+Spark Structured Streaming
+     ↓
+Delta Bronze
+     ↓
+PostgreSQL
+     ↓
+Superset Real-Time Dashboard
+```
+
+* 10-second micro-batches
+* Delta checkpointing for exactly-once processing semantics
+
+### Analytics Engineering
+
+* 6 staging views
+* 3 mart tables
+* 49 dbt data-quality tests
+* Auto-generated dbt lineage DAG
+
+### Kubernetes + Terraform
+
+* 3-node Kind cluster
+* Terraform-based cluster provisioning
+* Kustomize-based application deployment
+* One-command deployment:
+
+```bash
+make k8s-up
+```
+
+---
+
+# 🏗️ Architecture
+
+## v1 — Single Node
+
+```text
+CSV
+ │
+ ▼
+Staging
+ │
+ ▼
+PostgreSQL Star Schema
+(5 dimensions + 1 fact)
+ │
+ ├──────────────┬──────────────┐
+ ▼              ▼              ▼
+KPIs           RFM        Forecasting
+ │              │              │
+ └──────────────┼──────────────┘
+                ▼
+        ┌───────┴───────┐
+        ▼               ▼
+    Superset          FastAPI
+```
+
+## v2 — Distributed Spark + Delta Lake
+
+```text
+Parquet (1M rows)
+       │
+       ▼
+PySpark Ingestion
+       │
+       ▼
+Delta Bronze
+(partitioned by category)
+       │
+       ▼
+Delta Silver
+Star Schema
+(partitioned by year)
+       │
+       ▼
+Gold Aggregations
+       │
+       ▼
+PostgreSQL warehouse_big
+       │
+       ├── Spark MLlib
+       │   ├── RFM + KMeans
+       │   └── Forecasting
+       │
+       └── Superset + FastAPI
+```
+
+## Real-Time Streaming
+
+```text
+producer.py
+     │
+     ▼
+Kafka
+(topic: orders)
+     │
+     ▼
+Spark Structured Streaming
+     │
+     ▼
+Delta Bronze
+     │
+     ▼
+warehouse_big.orders_realtime
+     │
+     ▼
+Superset Real-Time Dashboard
+```
+
+## Kubernetes — Kind + Terraform
+
+```text
+Terraform
+    │
+    ▼
+Kind Cluster
+(1 control-plane + 2 workers)
+    │
+    ▼
+kubectl apply -k infrastructure/kubernetes/
+    │
+    ├──────────────┬──────────────┐
+    ▼              ▼              ▼
+PostgreSQL      FastAPI        Superset
+  + PVC         2 replicas     + PVC + init
+```
+
+Detailed architecture documentation:
+
+* [Big Data Architecture](docs/architecture_bigdata.md)
+* [Monitoring](docs/monitoring.md)
+* [dbt](docs/dbt.md)
+* [Streaming](docs/streaming.md)
+* [Kubernetes](docs/kubernetes.md)
+
+---
+
+# 🧰 Technology Stack
+
+| **Layer**             | **Technologies**                          |
+| --------------------- | ----------------------------------------- |
+| **Language**          | Python 3.12                               |
+| **Data Processing**   | Pandas · NumPy · PySpark                  |
+| **Databases**         | PostgreSQL · Delta Lake / Parquet         |
+| **Batch Compute**     | Spark · PySpark · Spark SQL · Spark MLlib |
+| **Stream Processing** | Kafka · Spark Structured Streaming        |
+| **Orchestration**     | Apache Airflow · Make                     |
+| **Transformation**    | dbt                                       |
+| **BI / Dashboards**   | Apache Superset                           |
+| **ML / Forecasting**  | scikit-learn · XGBoost · statsmodels      |
+| **API**               | FastAPI · Pydantic                        |
+| **Monitoring**        | Prometheus · Grafana · statsd-exporter    |
+| **Testing**           | pytest                                    |
+| **CI/CD**             | GitHub Actions                            |
+| **Containers**        | Docker · Docker Compose                   |
+| **Deployment**        | Kubernetes / Kind · Terraform · Kustomize |
+
+---
+
+# 🚀 Quickstart
 
 ## Prerequisites
 
-* Docker
-* Docker Compose
+* Docker + Docker Compose
 * Python 3.12
-* `make`
+* Make
+* Optional: Kind, Terraform, kubectl
 
-### 1. Clone
+## Local Development — v1
 
 ```bash
 git clone https://github.com/adnanphp/openbi.git
 cd openbi
-```
 
-### 2. Install dependencies
-
-```bash
 pip install -r requirements.txt
 pip install -e .
-```
 
-### 3. Start PostgreSQL + Superset
-
-```bash
 make up
+make init
 ```
 
-### 4. Run ETL
+The initialization command runs the v1 ETL and ML pipeline end-to-end.
 
-```bash
-make etl
-```
+### Services
 
-This performs:
+* **Superset:** http://localhost:8088
+* **FastAPI:** http://localhost:8000/docs
 
-```text
-CSV
- ↓
-Validation
- ↓
-Staging
- ↓
-Star Schema
- ↓
-KPI Views
-```
-
-### 5. Run machine learning
-
-```bash
-make ml
-```
-
-This runs:
-
-```text
-RFM Analysis
-     ↓
-KMeans Segmentation
-
-Sales History
-     ↓
-Baseline / ETS / XGBoost
-     ↓
-Forecast Selection
-```
-
-### 6. Explore the platform
-
-**Apache Superset**
-
-```text
-http://localhost:8088
-```
-
-Default development credentials:
+Default Superset credentials:
 
 ```text
 Username: admin
 Password: admin
 ```
 
-**FastAPI Swagger**
-
-```text
-http://localhost:8000/docs
-```
-
 ---
 
-# ⚡ One-Command Reproduction
-
-Run the complete pipeline:
+## Distributed Analytics — v2
 
 ```bash
-make init
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.bigdata.yml up -d
+
+make bigdata
+make bigdata-ml
+make bigdata-test
 ```
 
-Additional commands:
-
-```bash
-make test      # Run test suite
-make cov       # Tests + coverage
-make clean     # Remove containers and volumes
-```
-
----
-
-# 📈 Business Intelligence Results
-
-## Revenue & Profit — 2014–2017
-
-| Metric           |             Value |
-| ---------------- | ----------------: |
-|  Total Revenue | **$2,297,200.86** |
-|  Total Profit  |   **$286,397.02** |
-|  Profit Margin |        **12.47%** |
-|  Orders        |         **5,009** |
-|  Customers     |           **793** |
-|  Products      |         **1,862** |
-
----
-
-#  Customer Segmentation
-
-OpenBI uses **RFM analysis + KMeans clustering** to identify customer behavior patterns.
-
-### RFM Features
-
-* **Recency** — how recently the customer purchased
-* **Frequency** — how often the customer purchased
-* **Monetary** — how much the customer spent
-
-KMeans is applied to standardized RFM features, followed by rule-based business labels.
-
-### Segments
-
-| Segment                | Customers | Avg. Recency | Avg. Frequency | Avg. Monetary |
-| ---------------------- | --------: | -----------: | -------------: | ------------: |
-|  Champions           |       106 |      25 days |            9.3 |        $5,288 |
-|  At Risk             |       102 |     220 days |            7.8 |        $4,400 |
-|  Loyal Customers     |        92 |      55 days |            8.6 |        $3,426 |
-|  Potential Loyalists |       116 |      27 days |            6.2 |        $2,731 |
-|  Need Attention      |       221 |     167 days |            5.4 |        $2,297 |
-|  New Customers       |        39 |      25 days |            3.3 |        $1,421 |
-|  Lost                |       117 |     386 days |            3.4 |          $794 |
-
-###  Business Insight
-
-The **At Risk** segment contains **102 customers** representing approximately **$449K in historical revenue**.
-
-These customers previously demonstrated relatively high purchasing frequency but have not purchased recently, making the segment particularly relevant for customer-retention and win-back analysis.
-
----
-
-#  Sales Forecasting
-
-OpenBI evaluates multiple forecasting approaches:
+Pipeline:
 
 ```text
-Historical Sales
-       │
-       ├──────────────► Moving Average Baseline
-       │
-       ├──────────────► ETS / Holt-Winters
-       │
-       └──────────────► XGBoost + Lag Features
+Bronze → Silver → Gold → PostgreSQL
 ```
-
-### Model Comparison
-
-| Model                 |       MAPE |       RMSE |
-| --------------------- | ---------: | ---------: |
-| 🥇 ETS / Holt-Winters | **15.87%** | **15,885** |
-| XGBoost               |     28.85% |     34,769 |
-| Moving Average        |     38.66% |     41,460 |
-
-The pipeline automatically evaluates candidate models and stores the forecasting results.
-
-> **Observation:** ETS performs strongly on this relatively short historical time series, while the tree-based XGBoost model has less historical signal available for learning.
 
 ---
 
-# 🌐 FastAPI
+## Real-Time Streaming
 
-OpenBI exposes analytics through a REST API with automatically generated Swagger documentation.
+Start Kafka and create the required topic:
+
+```bash
+make streaming-up
+```
+
+Then run the streaming pipeline:
+
+```bash
+# Terminal 1
+python -m streaming.producer --rate 5
+
+# Terminal 2
+make streaming-bronze
+
+# Terminal 3
+make streaming-postgres
+
+# Terminal 4
+make streaming-status
+```
+
+---
+
+## dbt Transformations
+
+```bash
+make dbt-build
+make dbt-docs
+```
+
+This runs the dbt models and associated data-quality tests.
+
+The generated documentation server is available at:
+
+```text
+http://localhost:8085
+```
+
+---
+
+## Kubernetes Deployment
+
+```bash
+make k8s-up
+make k8s-status
+make k8s-down
+```
+
+`make k8s-up` provisions the Kind cluster through Terraform and applies the Kubernetes manifests.
+
+---
+
+# 📈 Results
+
+## Business Metrics — v1
+
+| **Metric**    |         **Value** |
+| ------------- | ----------------: |
+| Total revenue | **$2,297,200.86** |
+| Total profit  |   **$286,397.02** |
+| Profit margin |        **12.47%** |
+| Orders        |         **5,009** |
+| Customers     |           **793** |
+| Products      |         **1,862** |
+
+## Distributed Metrics — v2
+
+| **Layer**           |  **Rows** | **Notes**                        |
+| ------------------- | --------: | -------------------------------- |
+| Delta Bronze        | 1,000,000 | Partitioned by category          |
+| Delta Silver        | 1,000,000 | Star schema, partitioned by year |
+| Delta Gold          |     1,251 | 5 pre-aggregated KPI tables      |
+| `warehouse_big`     |     1,251 | JDBC-published                   |
+| `customer_segments` |       800 | 7 RFM segments                   |
+| `sales_forecast`    |        18 | 3 models × 6 months              |
+
+---
+
+## Customer Segmentation
+
+RFM features are clustered using KMeans and mapped to business-friendly segment names.
+
+| **Segment**         | **Customers** | **Recency** | **Frequency** | **Monetary** |
+| ------------------- | ------------: | ----------: | ------------: | -----------: |
+| Champions           |           106 |         25d |           9.3 |       $5,288 |
+| At Risk             |           102 |        220d |           7.8 |       $4,400 |
+| Loyal Customers     |            92 |         55d |           8.6 |       $3,426 |
+| Potential Loyalists |           116 |         27d |           6.2 |       $2,731 |
+| Need Attention      |           221 |        167d |           5.4 |       $2,297 |
+| New Customers       |            39 |         25d |           3.3 |       $1,421 |
+| Lost                |           117 |        386d |           3.4 |         $794 |
+
+**Key insight:** The **At Risk** segment represents approximately **$449K in historical revenue**, making it the primary win-back opportunity identified by the analysis.
+
+---
+
+## Sales Forecasting
+
+| **Model**                 |   **MAPE** |   **RMSE** |
+| ------------------------- | ---------: | ---------: |
+| 🥇 **ETS (Holt-Winters)** | **15.87%** | **15,885** |
+| XGBoost                   |     28.85% |     34,769 |
+| Moving Average            |     38.66% |     41,460 |
+
+The pipeline selects the winning model automatically based on holdout MAPE.
+
+---
+
+# 🌐 FastAPI Service
 
 Start the API:
 
@@ -323,25 +420,25 @@ Start the API:
 uvicorn openbi.api.main:app --reload --port 8000
 ```
 
-Swagger:
+Swagger documentation:
 
 ```text
 http://localhost:8000/docs
 ```
 
-### API Endpoints
+## Endpoints
 
-| Endpoint                    | Description              |
-| --------------------------- | ------------------------ |
-| `GET /health`               | Health check             |
-| `GET /kpis/executive`       | Executive KPIs           |
-| `GET /kpis/monthly-revenue` | Monthly revenue & profit |
-| `GET /kpis/by-category`     | Revenue by category      |
-| `GET /customers/segments`   | RFM customer segments    |
-| `GET /forecasts/latest`     | Latest selected forecast |
-| `GET /forecasts/models`     | All candidate forecasts  |
+| **Endpoint**                | **Description**                  |
+| --------------------------- | -------------------------------- |
+| `GET /health`               | Liveness check                   |
+| `GET /kpis/executive`       | Revenue, profit, orders, margin  |
+| `GET /kpis/monthly-revenue` | 48-month revenue trend           |
+| `GET /kpis/by-category`     | Revenue by product category      |
+| `GET /customers/segments`   | RFM segments and aggregates      |
+| `GET /forecasts/latest`     | Winning model's 6-month forecast |
+| `GET /forecasts/models`     | All candidate forecasting models |
 
-### Example
+Example:
 
 ```bash
 curl -s http://localhost:8000/customers/segments | jq
@@ -368,133 +465,94 @@ Example response:
 
 # 🗄️ Data Warehouse
 
-OpenBI follows a **star-schema architecture**.
-
-## Staging
+## v1 — PostgreSQL Star Schema
 
 ```text
-staging.superstore_raw
-    └── Raw source data
-
-staging.superstore
-    └── Typed staging view
+warehouse/
+├── dim_customer
+├── dim_product
+├── dim_region
+├── dim_ship_mode
+├── dim_date
+├── fact_sales
+├── v_monthly_revenue
+├── v_revenue_by_category
+├── v_revenue_by_region
+├── v_top_products
+└── v_customer_rfm
 ```
 
-## Warehouse
+## v2 — Delta Lake Medallion + PostgreSQL Serving
 
 ```text
-warehouse.dim_customer
-warehouse.dim_product
-warehouse.dim_region
-warehouse.dim_ship_mode
-warehouse.dim_date
-
-warehouse.fact_sales
-```
-
-## Analytics Views
-
-```text
-warehouse.v_monthly_revenue
-warehouse.v_revenue_by_category
-warehouse.v_revenue_by_region
-warehouse.v_top_products
-warehouse.v_customer_rfm
-```
-
-## ML Outputs
-
-```text
-warehouse.customer_segments
-warehouse.sales_forecast
-warehouse.v_forecast_vs_actual
+data/bronze/sales/      ← Delta, partitioned by category
+data/silver/dim_*/      ← Delta, star schema
+data/silver/fact_sales/ ← Delta, partitioned by year
+data/gold/*/            ← Delta, 5 KPI tables
+warehouse_big.*         ← PostgreSQL, JDBC-published
 ```
 
 ---
 
-# 📊 Apache Superset
+# 🧪 Testing
 
-The project includes **three BI dashboards**:
-
-### 🏢 Executive Dashboard
-
-High-level business KPIs:
-
-* Revenue
-* Profit
-* Profit margin
-* Orders
-* Average order value
-* Monthly performance
-
-### 📈 Sales Dashboard
-
-* Revenue trends
-* Category performance
-* Regional performance
-* Top products
-* Forecast vs actual
-
-### 👥 Customer Dashboard
-
-* RFM distributions
-* Customer segments
-* Segment revenue
-* Customer behavior
-
----
-
-# 🧪 Testing & Quality
-
-OpenBI includes automated testing across multiple layers.
-
-```text
-tests/
-├── unit/
-├── integration/
-└── data_quality/
-```
-
-### Test Coverage
-
-| Layer                 | Scope                                      |
-| --------------------- | ------------------------------------------ |
-| `tests/unit/`         | Forecasting, RFM scoring, KPI calculations |
-| `tests/integration/`  | Warehouse totals, API endpoints            |
-| `tests/data_quality/` | Nulls, uniqueness, referential integrity   |
-
-Run tests:
+Run the different test layers with:
 
 ```bash
 pytest tests -v
+make bigdata-test
+make dbt-test
 ```
 
-### Current Status
+| **Layer**                  | **Scope**                                |
+| -------------------------- | ---------------------------------------- |
+| `tests/unit/`              | Forecasting, RFM, KPI calculations       |
+| `tests/integration/`       | Warehouse totals, API endpoints          |
+| `tests/data_quality/`      | Nulls, uniqueness, referential integrity |
+| `spark/tests/`             | Silver, Gold, and ML tests               |
+| `dbt/models/**/schema.yml` | dbt data-quality tests                   |
 
-```text
-27 tests
-    ↓
-GitHub Actions
-    ↓
-     ✅ CI GREEN
-```
+### Test Coverage
+
+**100+ automated checks** across the project, with both CI workflows configured to run automatically.
 
 ---
 
-# 🐳 Full Docker Stack
+# 📊 Dashboards
 
-Start the complete environment:
+Apache Superset provides four main analytical views:
 
-```bash
-docker compose up -d
-```
+### Executive
 
-| Service    |   Port | Purpose                            |
-| ---------- | -----: | ---------------------------------- |
-| PostgreSQL | `5432` | Data warehouse + Superset metadata |
-| Superset   | `8088` | BI dashboards                      |
-| FastAPI    | `8000` | Analytics REST API                 |
-| Airflow    | `8080` | Optional DAG orchestration         |
+Revenue, profit, margin, and monthly trends.
+
+### Sales
+
+Category, region, and product-level drill-downs.
+
+### Customer
+
+RFM segments, revenue by segment, and customer risk.
+
+### Real-Time Orders
+
+Live events flowing through the Kafka → Spark Structured Streaming pipeline.
+
+Screenshots are available in [`docs/images/`](docs/images/).
+
+---
+
+# 📚 Documentation
+
+| **Document**                                                   | **Topic**                     |
+| -------------------------------------------------------------- | ----------------------------- |
+| [`docs/architecture_bigdata.md`](docs/architecture_bigdata.md) | v2 Spark + Delta architecture |
+| [`docs/gold_schema.md`](docs/gold_schema.md)                   | Gold-layer schema             |
+| [`docs/ml_schema.md`](docs/ml_schema.md)                       | ML output tables              |
+| [`docs/monitoring.md`](docs/monitoring.md)                     | Prometheus + Grafana          |
+| [`docs/dbt.md`](docs/dbt.md)                                   | dbt models + tests            |
+| [`docs/streaming.md`](docs/streaming.md)                       | Kafka + Structured Streaming  |
+| [`docs/kubernetes.md`](docs/kubernetes.md)                     | Kubernetes + Terraform        |
 
 ---
 
@@ -502,332 +560,101 @@ docker compose up -d
 
 ```text
 openbi/
+├── src/openbi/
+│   ├── ingestion/            # CSV → staging
+│   ├── etl/                  # ETL pipeline
+│   ├── analytics/            # RFM, KPIs
+│   ├── ml/                   # Segmentation, forecasting
+│   ├── api/                  # FastAPI service
+│   ├── metrics/              # Prometheus exporter
+│   └── orchestration/dags/   # Airflow DAGs
 │
-├── README.md
-├── LICENSE
-├── Makefile
-├── requirements.txt
-├── pyproject.toml
-├── docker-compose.yml
+├── spark/
+│   ├── jobs/                 # Bronze → Silver → Gold → ML
+│   └── tests/                # Spark tests
 │
-├── data/
-│   └── raw/
-│       └── superstore.csv
+├── dbt/                      # dbt models + tests
+├── streaming/                # Kafka producer
+├── sql/                      # DDL + transformations + views
+├── docker/                   # Per-service Dockerfiles
+├── monitoring/               # Prometheus + Grafana
+├── airflow/                  # Airflow DAGs
 │
-├── src/
-│   └── openbi/
-│       ├── ingestion/
-│       │   └── CSV → staging
-│       │
-│       ├── etl/
-│       │   └── pipeline orchestration
-│       │
-│       ├── analytics/
-│       │   ├── rfm/
-│       │   └── kpis/
-│       │
-│       ├── ml/
-│       │   ├── segmentation/
-│       │   └── forecasting/
-│       │
-│       ├── api/
-│       │   └── FastAPI service
-│       │
-│       └── orchestration/
-│           └── dags/
+├── infrastructure/
+│   ├── terraform/            # Kind cluster provisioning
+│   └── kubernetes/           # Kustomize manifests
 │
-├── sql/
-│   ├── ddl/
-│   ├── transforms/
-│   └── views/
-│
-├── docker/
-│   ├── postgres/
-│   └── superset/
-│
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── data_quality/
-│
-├── notebooks/
-│   └── EDA / RFM exploration
-│
-└── docs/
-    └── images/
-        └── dashboard screenshots
+├── tests/                    # v1 test suite
+├── docs/                     # Documentation + screenshots
+└── Makefile                  # One-command workflows
 ```
 
 ---
 
 # 🧠 Design Decisions
 
-### 1. Historical RFM Anchor
+### Historical RFM Anchor
 
-RFM recency is anchored to the **last order in the dataset**, rather than `CURRENT_DATE`.
+Recency is anchored to the **last order in the dataset**, rather than `CURRENT_DATE`, preventing historical customers from being incorrectly classified as stale.
 
-This prevents historical customers from incorrectly appearing extremely stale when analyzing an older dataset.
+### Translation at Ingestion
 
----
+The Portuguese Superstore CSV variant is translated to English during ingestion in `load_csv.py`, keeping downstream SQL and analytics readable.
 
-### 2. Data Translation at Ingestion
+### Business-Friendly Segment Labels
 
-The Portuguese Superstore variant is translated to English during ingestion.
+KMeans cluster IDs are mapped to meaningful business labels such as **Champions**, **At Risk**, and **Loyal Customers** using RFM-based rules rather than exposing arbitrary cluster numbers.
 
-```text
-Raw CSV
-   ↓
-load_csv.py
-   ↓
-English + typed data
-   ↓
-SQL / Analytics
-```
+### Idempotent Pipelines
 
-This keeps downstream SQL and analytics readable.
+SQL operations use `IF NOT EXISTS` or `DROP ... CASCADE`, allowing `make init` to be rerun reproducibly.
 
----
+### Two-Tier Warehouse
 
-### 3. Business-Friendly Segment Labels
+v1 uses PostgreSQL under `warehouse.*`.
 
-KMeans clusters receive **rule-based business labels** rather than relying on arbitrary cluster IDs.
+v2 uses Delta Lake with PostgreSQL serving under `warehouse_big.*`.
 
-For example:
+The BI layer can work against either warehouse schema without requiring changes to the analytical layer.
 
-```text
-Cluster 0 ❌
-Cluster 1 ❌
-Cluster 2 ❌
+### Local Streaming, Distributed Batch
 
-Champions       ✅
-At Risk         ✅
-Loyal Customers ✅
-```
+Kafka micro-batches are small, so the PostgreSQL streaming sink uses `--master local[2]`.
 
-This makes ML results easier to communicate to business users.
+The two-worker Spark cluster is reserved for heavier batch workloads.
+
+### Kind over Minikube
+
+Kind runs Kubernetes nodes as Docker containers, making it lightweight and convenient for local development and CI. Terraform provisions the cluster, while Kustomize manages workloads.
 
 ---
 
-### 4. Idempotent Pipeline
+# 🎯 What This Project Demonstrates
 
-The pipeline is designed to be safely re-run.
-
-SQL operations use patterns such as:
-
-```sql
-CREATE TABLE IF NOT EXISTS ...
-```
-
-and controlled cleanup with:
-
-```sql
-DROP ... CASCADE
-```
-
-This supports reproducible development and testing.
-
----
-
-# 🔄 End-to-End Workflow
-
-```text
-             RAW DATA
-                │
-                ▼
-        ┌───────────────┐
-        │   Ingestion   │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │    Staging    │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │ Star Schema   │
-        └───────┬───────┘
-                │
-       ┌────────┼─────────┐
-       ▼        ▼         ▼
-     KPIs      RFM     Forecasting
-       │        │         │
-       └────────┼─────────┘
-                │
-        ┌───────┴────────┐
-        ▼                ▼
-   Superset           FastAPI
-   Dashboards            API
-```
-
----
-
-# 🎯 Project Goals
-
-OpenBI demonstrates an end-to-end workflow for building a modern analytics platform:
-
-* ✅ Data ingestion
-* ✅ Data validation
-* ✅ ETL
-* ✅ Dimensional modeling
-* ✅ PostgreSQL data warehouse
-* ✅ Business KPI development
-* ✅ Customer segmentation
-* ✅ Machine-learning forecasting
-* ✅ REST API development
-* ✅ Interactive BI dashboards
-* ✅ Automated testing
-* ✅ CI/CD
-* ✅ Dockerized deployment
-* ✅ Reproducible pipelines
-
----
-
-# 📌 Project Status
-
-```text
-████████████████████████████████████████  Production-style MVP
-```
-
-The platform is designed as a portfolio project demonstrating **Data Engineering + Business Intelligence + Machine Learning + Backend/API Engineering + DevOps** in one reproducible system.
+* ✅ **Data engineering** — ETL, orchestration, distributed pipelines
+* ✅ **Analytics engineering** — dbt, dimensional modeling, data-quality testing
+* ✅ **Business intelligence** — KPI design, dashboards, drill-down analysis
+* ✅ **Machine learning** — RFM + KMeans, time-series forecasting
+* ✅ **Stream processing** — Kafka + Structured Streaming
+* ✅ **Backend engineering** — FastAPI, Pydantic, REST APIs
+* ✅ **Observability** — Prometheus metrics and Grafana dashboards
+* ✅ **DevOps** — Docker Compose, CI pipelines, multi-service deployment
+* ✅ **Infrastructure as Code** — Terraform, Kubernetes, Kustomize
+* ✅ **Reproducibility** — one-command workflows across multiple layers
 
 ---
 
 # 📄 License
 
-This project is licensed under the **MIT License**.
+MIT License — see [`LICENSE`](LICENSE).
 
 ---
 
 <p align="center">
   <b>OpenBI</b> · Open-source Business Intelligence & Analytics
   <br>
-  Built with Python, PostgreSQL, ML, FastAPI, Superset & Docker
+  <sub>
+    Python · PostgreSQL · Spark · Delta Lake · Kafka · dbt · Airflow ·
+    Superset · FastAPI · Prometheus · Kubernetes
+  </sub>
 </p>
-
-
-CI includes a fresh-venv import check — prevents "works on my machine" class bugs.
-
- License
-MIT
-
-## 🗄️ Warehouse Schema
-
-![OpenBI Star Schema](docs/architecture/schema.png)
-
-## 🔥 Big Data Extension (v2)
-
-OpenBI scales from 10K rows (v1, Postgres) to **100M+ rows** (v2, Delta Lake + Spark)
-with the same star schema, dashboards, and API.
-
-See [docs/architecture_bigdata.md](docs/architecture_bigdata.md) for the full architecture.
-
-**Stack:** Apache Spark · PySpark · Spark SQL · Delta Lake · Parquet · Airflow · PostgreSQL · Docker
-
-**Run:**
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.bigdata.yml up -d
-./spark/run_job.sh jobs/ingest_to_bronze.py
-
----
-
-## ✅ Full v2 Roadmap Complete
-
-| Phase | Deliverable | Status |
-|---|---|---|
-| A | Spark + Delta Lake foundation (1M-row Bronze) | ✅ |
-| B | Silver star schema (5 dims + 1 fact, partitioned by year) | ✅ |
-| C | Gold aggregates → Postgres serving layer | ✅ |
-| D | Spark MLlib RFM + KMeans + forecasting | ✅ |
-| E | Airflow orchestration (daily / weekly / hourly DAGs) | ✅ |
-
-### Metrics
-
-| Layer | Rows | Notes |
-|---|---:|---|
-| Bronze (Delta) | 1,000,000 | raw, partitioned by category |
-| Silver (Delta) | 1,000,000 | star schema, partitioned by year |
-| Gold (Delta) | 1,251 | 5 pre-aggregated KPI tables |
-| `warehouse_big` (Postgres) | 1,251 | same 5 tables, JDBC-published |
-| `customer_segments` | 800 | 7 RFM segments |
-| `sales_forecast` | 18 | 3 models × 6 months |
-
-### Verified end-to-end
-
-- **34 tests** (13 silver + 12 gold + 9 ml)
-- **CI green** on every push
-- **Airflow** at `http://localhost:8090` — 3 DAGs, `openbi_smoke` runs green
-- **v1 vs v2** coexist in Postgres:
-  - `warehouse` (10K rows) → $2,297,200.86
-  - `warehouse_big` (1M rows) → $287,833,061.24
-
-### One-command pipelines
-
-```bash
-make bigdata        # bronze → silver → gold → postgres (v2)
-make bigdata-ml     # RFM + KMeans + forecasting
-make bigdata-test   # 34 Spark tests
-make airflow-up     # Airflow UI at http://localhost:8090
-
----
-
-## ✅ Complete Roadmap
-
-| Phase | Deliverable | Status |
-|---|---|---|
-| A | Spark + Delta foundation | ✅ |
-| B | Silver star schema | ✅ |
-| C | Gold aggregates → Postgres | ✅ |
-| D | Spark MLlib RFM + forecasting | ✅ |
-| E | Airflow orchestration | ✅ |
-| F | Spark CI in GitHub Actions | ✅ |
-| G | Prometheus + Grafana | ✅ |
-| H | dbt Analytics Engineering | ✅ |
-| I | Kafka + Spark Structured Streaming | ✅ |
-
-## Full Stack
-
-- **Ingestion:** Kafka (KRaft), pandas, PySpark
-- **Storage:** Delta Lake, PostgreSQL
-- **Compute:** Apache Spark (batch + streaming), Spark SQL, Spark MLlib
-- **Orchestration:** Apache Airflow, Make
-- **Transformation:** dbt (49 tests, lineage docs)
-- **BI:** Apache Superset (batch + real-time dashboards)
-- **API:** FastAPI
-- **Monitoring:** Prometheus, Grafana, statsd-exporter
-- **CI:** GitHub Actions (2 workflows)
-- **Runtime:** Docker Compose (4 overlay files)
-
-## Services
-
-| Service | URL |
-|---|---|
-| Superset | http://localhost:8088 |
-| Airflow | http://localhost:8090 |
-| Grafana | http://localhost:3001 |
-| Prometheus | http://localhost:9090 |
-| Kafka UI | http://localhost:8086 |
-| Spark master UI | http://localhost:8095 |
-| dbt docs | http://localhost:8085 |
-| FastAPI | http://localhost:8000/docs |
-
-## Kubernetes Deployment
-
-OpenBI can be deployed to a local Kubernetes cluster provisioned with
-Terraform and Kind.
-
-```bash
-# 1. Provision the cluster
-cd infrastructure/terraform
-terraform init && terraform apply
-
-# 2. Deploy OpenBI
-kubectl config use-context kind-openbi
-kubectl apply -k infrastructure/kubernetes/
-
-# 3. Verify
-kubectl get pods -n openbi
-kubectl port-forward -n openbi svc/fastapi 8000:8000
-curl http://localhost:8000/health
-See docs/kubernetes.md for full instructions.
