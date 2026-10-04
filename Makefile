@@ -130,3 +130,23 @@ fix-perms:
 	@mkdir -p data/checkpoints/orders_bronze data/checkpoints/orders_postgres
 	@sudo chmod -R 777 data/bronze data/silver data/gold data/checkpoints data/streaming
 	@echo "✓ data folders are writable"
+
+backup:
+	@mkdir -p backups
+	docker compose -f docker-compose.yml exec -T postgres pg_dump -U openbi openbi > backups/openbi_$$(date +%Y%m%d_%H%M%S).sql
+	@echo "✓ Backup written to backups/"
+
+restore:
+	@ls -t backups/*.sql | head -1 | xargs -I {} sh -c 'cat {} | docker compose -f docker-compose.yml exec -T postgres psql -U openbi -d openbi'
+	@echo "✓ Restored from latest backup"
+
+# ---- v2 ML ----
+bigdata-ml:
+	./spark/run_job.sh jobs/ml_rfm_kmeans.py
+	./spark/run_job.sh jobs/ml_forecast.py
+	./spark/run_job.sh jobs/publish_ml_to_postgres.py
+
+bigdata-ml:
+	./spark/run_job.sh jobs/ml_rfm_kmeans.py
+	./spark/run_job.sh jobs/ml_forecast.py
+	./spark/run_job.sh jobs/publish_ml_to_postgres.py

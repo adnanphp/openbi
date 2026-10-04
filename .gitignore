@@ -84,3 +84,6 @@ profiles.yml
 # ---- Streaming ----
 data/streaming/
 data/checkpoints/
+
+# backups are local only — do not commit dumps
+backups/*.sql

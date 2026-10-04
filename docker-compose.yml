@@ -64,7 +64,6 @@ services:
       retries: 20
       start_period: 60s
 
-
   airflow:
     image: apache/airflow:2.9.1-python3.11
     container_name: openbi-airflow
@@ -99,8 +98,6 @@ services:
           --role Admin --email admin@openbi.local --password admin || true) &&
         airflow webserver & airflow scheduler
       "
-
-
 
   # -------------------- MONITORING --------------------
   statsd-exporter:
@@ -168,7 +165,6 @@ services:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
-
 
 volumes:
   openbi_pgdata:
