@@ -6,7 +6,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from openbi.api.cache import get_stats as cache_stats
+from openbi.api.logging_middleware import (
+    StructuredLoggingMiddleware,
+    configure_root_logger,
+)
 from openbi.api.routes import customers, forecasts, sales
+
+configure_root_logger()
 
 app = FastAPI(
     title="OpenBI API",
@@ -20,6 +26,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(StructuredLoggingMiddleware)
 
 app.include_router(sales.router)
 app.include_router(customers.router)
