@@ -11,7 +11,7 @@ minimal application changes.
 - [x] **Phase 3 — Redis cache** (maps to ElastiCache / Memorystore)
 - [x] **Phase 4 — LocalStack** (S3, SQS, Lambda via boto3)
 - [x] **Phase 5 — Serverless function** (OpenFaaS; maps to Lambda / Cloud Functions)
-- [ ] **Phase 6 — Terraform refactor** (full IaC; destroy and rebuild)
+- [x] **Phase 6 — Terraform refactor** (full IaC; destroy and rebuild)
 - [ ] **Phase 7 — Loki + structured logging** (maps to CloudWatch Logs / Cloud Logging)
 - [ ] **Phase 8 — Cloud-mapping document** (the highest-value artifact)
 
