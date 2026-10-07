@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstack
+  namespace: localstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: localstack
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+        - name: localstack
+          image: localstack/localstack:3.8
+          env:
+            # S3 and SQS are the two services we use.
+            # Adding services costs nothing at startup but expands the API surface.
+            - name: SERVICES
+              value: "s3,sqs"
+            - name: DEBUG
+              value: "0"
+            - name: PERSISTENCE
+              value: "0"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-1"
+            - name: DISABLE_EVENTS
+              value: "1"
+          ports:
+            - name: edge
+              containerPort: 4566
+          readinessProbe:
+            httpGet:
+              path: /_localstack/health
+              port: 4566
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /_localstack/health
+              port: 4566
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
