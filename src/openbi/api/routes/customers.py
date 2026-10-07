@@ -6,14 +6,21 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
+from openbi.api.cache import cache_get, cache_set
 from openbi.api.dependencies import get_db
 from openbi.api.schemas.customer_schema import SegmentSummary
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
+TTL_SEGMENTS = 600
+
 
 @router.get("/segments", response_model=list[SegmentSummary])
 def segments(db: Connection = Depends(get_db)) -> list[SegmentSummary]:
+    cached = cache_get("customers:segments")
+    if cached is not None:
+        return [SegmentSummary(**row) for row in cached]
+
     sql = text("""
         SELECT
             cluster_label,
@@ -26,7 +33,7 @@ def segments(db: Connection = Depends(get_db)) -> list[SegmentSummary]:
         GROUP BY cluster_label
         ORDER BY total_monetary DESC
     """)
-    return [
+    result = [
         SegmentSummary(
             cluster_label=r["cluster_label"],
             customers=int(r["customers"]),
@@ -37,3 +44,9 @@ def segments(db: Connection = Depends(get_db)) -> list[SegmentSummary]:
         )
         for r in db.execute(sql).mappings()
     ]
+    cache_set(
+        "customers:segments",
+        [r.model_dump() for r in result],
+        ttl=TTL_SEGMENTS,
+    )
+    return result

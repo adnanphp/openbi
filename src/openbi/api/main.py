@@ -1,17 +1,11 @@
-"""OpenBI — FastAPI application entry point.
-
-Run:
-    uvicorn openbi.api.main:app --reload --port 8000
-
-Docs:
-    http://localhost:8000/docs
-"""
+"""OpenBI — FastAPI application entry point."""
 
 from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from openbi.api.cache import get_stats as cache_stats
 from openbi.api.routes import customers, forecasts, sales
 
 app = FastAPI(
@@ -37,10 +31,16 @@ def health() -> dict[str, str]:
     return {"status": "OK"}
 
 
+@app.get("/cache/stats", tags=["meta"])
+def cache_statistics() -> dict:
+    """Redis cache connection status and hit/miss statistics."""
+    return cache_stats()
+
+
 @app.get("/", tags=["meta"])
 def root() -> dict[str, str]:
     return {
         "service": "OpenBI API",
         "docs": "/docs",
-        "endpoints": "/kpis /customers /forecasts",
+        "endpoints": "/kpis /customers /forecasts /cache/stats",
     }

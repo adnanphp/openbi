@@ -24,6 +24,20 @@ spec:
           env:
             - name: DATABASE_URL
               value: postgresql+psycopg2://openbi:openbi@postgres:5432/openbi
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: openbi
+            - name: POSTGRES_PASSWORD
+              value: openbi
+            - name: POSTGRES_DB
+              value: openbi
+            - name: REDIS_HOST
+              value: redis.redis.svc.cluster.local
+            - name: REDIS_PORT
+              value: "6379"
           readinessProbe:
             httpGet:
               path: /health
