@@ -12,7 +12,7 @@ minimal application changes.
 - [x] **Phase 4 — LocalStack** (S3, SQS, Lambda via boto3)
 - [x] **Phase 5 — Serverless function** (OpenFaaS; maps to Lambda / Cloud Functions)
 - [x] **Phase 6 — Terraform refactor** (full IaC; destroy and rebuild)
-- [ ] **Phase 7 — Loki + structured logging** (maps to CloudWatch Logs / Cloud Logging)
+- [x] **Phase 7 — Loki + structured logging** (maps to CloudWatch Logs / Cloud Logging)
 - [ ] **Phase 8 — Cloud-mapping document** (the highest-value artifact)
 
 ## Non-goals for v3.0.0

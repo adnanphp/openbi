@@ -110,7 +110,7 @@ This document grows as v3.0.0 progresses.
 ☑ Phase 4 — LocalStack (S3 + SQS) → S3 + SQS
 □ Phase 5 — Serverless function → Lambda / Cloud Functions
 ✅ Phase 6 — Terraform refactor → Terraform AWS/GCP providers
-□ Phase 7 — Loki + structured logging → CloudWatch Logs / Cloud Logging
+✅ Phase 7 — Loki + structured logging → CloudWatch Logs / Cloud Logging
 □ Phase 8 — Full mapping doc (this file, completed)
 Related documents
 v3-roadmap.md — the phased plan
