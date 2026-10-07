@@ -683,3 +683,45 @@ Key transferability points:
   would provision EKS or GKE
 
 This is documented in detail in [docs/cloud-mapping.md](docs/cloud-mapping.md).
+
+---
+
+## Cloud readiness (v3.0.0)
+
+OpenBI v3.0.0 adds a complete cloud-readiness layer that runs entirely
+locally at zero cost. Every component is chosen because it speaks the
+same protocol or implements the same concept as its managed AWS or GCP
+counterpart:
+
+| Capability | Local | AWS | GCP |
+| --- | --- | --- | --- |
+| Ingress | Traefik | ALB | Cloud LB |
+| Object storage | MinIO / LocalStack S3 | S3 | Cloud Storage |
+| Cache | Redis | ElastiCache | Memorystore |
+| Messaging | LocalStack SQS | SQS | Cloud Tasks |
+| Serverless | OpenFaaS | Lambda | Cloud Functions |
+| Logging | Loki + Promtail | CloudWatch Logs | Cloud Logging |
+| Infrastructure as code | Terraform + Kind | Terraform + EKS | Terraform + GKE |
+
+**Reproducibility:** the entire platform is rebuildable with a single
+`terraform apply` and one bootstrap script. Test it yourself:
+
+```bash
+cd infrastructure/terraform
+terraform destroy
+terraform apply
+./scripts/bootstrap-kind-images.sh
+Transferability: the boto3 code written against LocalStack S3 and
+SQS runs unchanged against real AWS — only endpoint_url and
+credentials change.
+
+Documentation: docs/cloud-mapping.md is the
+full index of mappings, transferability notes, and cloud deployment
+deltas. Per-component detail lives in
+docs/networking.md,
+docs/storage.md,
+docs/caching.md,
+docs/localstack.md,
+docs/serverless.md,
+docs/terraform.md,
+docs/logging.md.
