@@ -17,7 +17,7 @@ variable "worker_count" {
 }
 
 variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file"
+  description = "Absolute path to the kubeconfig file (tilde is not expanded by the kind provider)"
   type        = string
-  default     = "~/.kube/config"
+  default     = "/home/adnan/.kube/config"
 }

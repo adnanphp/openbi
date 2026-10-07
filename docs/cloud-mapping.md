@@ -31,7 +31,7 @@ one you'd deploy to AWS or GCP**, at zero cost, with real SDK code.
 | Prometheus + Grafana   | Amazon Managed Prometheus / Managed Grafana | Google Cloud Managed Service for Prometheus / Cloud Monitoring | (monitoring docs)                     |
 | Docker images          | Amazon ECR                             | Artifact Registry                      | (v2 CI docs)                          |
 | Kind Kubernetes        | Amazon EKS                             | Google Kubernetes Engine (GKE)         | (K8s docs)                            |
-| Terraform              | Terraform AWS provider                 | Terraform Google provider              | (Phase 6, forthcoming)                |
+| Terraform              | Terraform AWS provider                 | Terraform Google provider              | [terraform.md](terraform.md)                |
 | GitHub Actions         | CodeBuild / CodePipeline               | Cloud Build                            | (CI docs)                             |
 
 ---
@@ -109,7 +109,7 @@ This document grows as v3.0.0 progresses.
 ☑ Phase 3 — Redis → ElastiCache / Memorystore
 ☑ Phase 4 — LocalStack (S3 + SQS) → S3 + SQS
 □ Phase 5 — Serverless function → Lambda / Cloud Functions
-□ Phase 6 — Terraform refactor → Terraform AWS/GCP providers
+✅ Phase 6 — Terraform refactor → Terraform AWS/GCP providers
 □ Phase 7 — Loki + structured logging → CloudWatch Logs / Cloud Logging
 □ Phase 8 — Full mapping doc (this file, completed)
 Related documents
