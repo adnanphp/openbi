@@ -1,0 +1,32 @@
+---
+# Traefik IngressRoute for OpenBI FastAPI
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: openbi-api
+  namespace: openbi
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`api.openbi.local`)
+      kind: Rule
+      services:
+        - name: fastapi
+          port: 8000
+---
+# Traefik IngressRoute for Superset
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: openbi-superset
+  namespace: openbi
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`superset.openbi.local`)
+      kind: Rule
+      services:
+        - name: superset
+          port: 8088

@@ -6,7 +6,7 @@ minimal application changes.
 
 ## Phases
 
-- [ ] **Phase 1 — Traefik ingress** (maps to AWS ALB / GCP Load Balancer)
+- [x] **Phase 1 — Traefik ingress** (maps to AWS ALB / GCP Load Balancer)
 - [ ] **Phase 2 — MinIO object storage** (maps to S3 / GCS)
 - [ ] **Phase 3 — Redis cache** (maps to ElastiCache / Memorystore)
 - [ ] **Phase 4 — LocalStack** (S3, SQS, Lambda via boto3)
