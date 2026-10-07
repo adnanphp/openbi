@@ -7,17 +7,17 @@ variable "cluster_name" {
 variable "node_image" {
   description = "Kind node image version"
   type        = string
-  default     = "kindest/node:v1.27.3"
+  default     = "kindest/node:v1.30.2"
 }
 
 variable "worker_count" {
   description = "Number of worker nodes"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file"
+  description = "Absolute path to the kubeconfig file (tilde is not expanded by the kind provider)"
   type        = string
   default     = "/home/adnan/.kube/config"
 }

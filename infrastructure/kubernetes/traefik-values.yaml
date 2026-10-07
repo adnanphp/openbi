@@ -1,0 +1,39 @@
+# Helm values for Traefik in the OpenBI Kind cluster.
+#
+# Uses hostPort 80/443 on the ingress-ready node, so Kind's host port
+# mappings (8080 -> 80, 8443 -> 443) route external requests directly
+# into Traefik.
+#
+# Install:
+#   helm install traefik traefik/traefik \
+#     -n traefik \
+#     -f infrastructure/kubernetes/traefik-values.yaml
+
+# Bind Traefik's HTTP/HTTPS ports as hostPorts on the node.
+ports:
+  web:
+    hostPort: 80
+  websecure:
+    hostPort: 443
+
+# Use ClusterIP (no cloud LB in Kind).
+service:
+  type: ClusterIP
+
+# Only schedule on the Kind node labeled ingress-ready=true.
+nodeSelector:
+  ingress-ready: "true"
+
+# Tolerate the control-plane taint.
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+# Enable the Traefik dashboard.
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.openbi.local`)
+    entryPoints:
+      - web
