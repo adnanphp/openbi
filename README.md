@@ -662,3 +662,24 @@ MIT License — see [`LICENSE`](LICENSE).
 ## Writeups
 
 - **Dev.to:** [How I Built a Two-Tier Data Platform in 9 Phases](https://dev.to/adnanphp/how-i-built-a-two-tier-data-platform-in-9-phases-spark-kafka-dbt-kubernetes-1ebe)
+
+## Cloud readiness
+
+OpenBI runs entirely locally, but every component is designed to map to
+a managed service in AWS or GCP. The full mapping lives in
+[docs/cloud-mapping.md](docs/cloud-mapping.md).
+
+The goal is to learn real cloud concepts — object storage, cache-aside,
+queue semantics, ingress, IaC — against local infrastructure that speaks
+the same protocols, at zero cost.
+
+Key transferability points:
+
+- **boto3** code written for LocalStack S3/SQS runs unchanged against
+  real AWS
+- **Traefik** ingresses map to ALB or Cloud Load Balancing
+- **Redis** cache-aside maps directly to ElastiCache or Memorystore
+- **Terraform** (Phase 6) provisions the Kind cluster the same way it
+  would provision EKS or GKE
+
+This is documented in detail in [docs/cloud-mapping.md](docs/cloud-mapping.md).
